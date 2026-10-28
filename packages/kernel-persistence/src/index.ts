@@ -22,6 +22,7 @@ export type {
   SqlConnection,
   SqlExecutor,
 } from './executor.js';
+export { PgIdempotencyStore } from './idempotency-store.js';
 export {
   InvalidMigrationNameError,
   MigrationChecksumMismatchError,

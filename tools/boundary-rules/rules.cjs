@@ -61,6 +61,23 @@ const boundaryRules = [
     from: { pathNot: '^packages/kernel-scope/' },
     to: { path: '^(node:)?async_hooks$' },
   },
+  {
+    name: 'kernel-config-is-framework-free',
+    severity: 'error',
+    comment: 'ADR 0007/D15: kernel-config solo importa módulos locales, core y los paquetes de dominio del kernel (domain/scope); cero frameworks (fuera de tests).',
+    from: { path: '^packages/kernel-config/', pathNot: TEST_FILES },
+    to: {
+      dependencyTypesNot: ['local', 'core'],
+      pathNot: '^(@kernel/(domain|scope)|packages/kernel-(domain|scope)/)',
+    },
+  },
+  {
+    name: 'kernel-config-no-adapters',
+    severity: 'error',
+    comment: 'ADR 0007/D7: kernel-config (dominio) no importa adaptadores (kernel-http, kernel-persistence).',
+    from: { path: '^packages/kernel-config/', pathNot: TEST_FILES },
+    to: { path: '^(@kernel/(http|persistence)|packages/kernel-(http|persistence)/)' },
+  },
 ];
 
 module.exports = { boundaryRules };

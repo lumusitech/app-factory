@@ -109,6 +109,7 @@ Sin tildes, `ñ` ni espacios en nombres de archivo.
 ```
 app-factory/
 ├── CONTRIBUTING.md           # este archivo
+├── LICENSE                   # MIT (c) 2026 LumusiTech
 ├── docs/
 │   ├── kernel-context.md     # arquitectura del kernel
 │   └── teacher-service-context.md

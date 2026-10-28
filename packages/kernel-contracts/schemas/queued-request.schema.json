@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-factory.dev/kernel/contracts/queued-request.schema.json",
+  "title": "QueuedRequest",
+  "description": "Unidad de la cola offline del cliente. Extraído de docs/contracts/sync.md §7 en la fase 1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "order", "method", "path", "idempotencyKey", "state", "createdAt", "attempts"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificador local del item en la cola (UUIDv7)."
+    },
+    "order": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Secuencia FIFO de encolado. Estrictamente creciente dentro de un cliente."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["POST", "PUT", "PATCH", "DELETE"],
+      "description": "Método HTTP de la mutación."
+    },
+    "path": {
+      "type": "string",
+      "description": "Ruta enrutada de destino, sin query string."
+    },
+    "body": {
+      "type": ["object", "null"],
+      "description": "Cuerpo de la request. Null cuando la mutación no lleva cuerpo (p. ej. DELETE)."
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "description": "Valor del header Idempotency-Key. Único por operación lógica."
+    },
+    "baseVersion": {
+      "type": ["string", "null"],
+      "description": "Token de versión de la entidad al momento de la captura. Null si la operación no versiona."
+    },
+    "state": {
+      "type": "string",
+      "enum": ["pending", "blocked"],
+      "description": "Estado del item en la cola."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Instante de encolado (ISO 8601)."
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cantidad de intentos de envío realizados."
+    },
+    "lastAttemptAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Instante del último intento, o null si nunca se intentó."
+    },
+    "blockedReason": {
+      "type": ["object", "null"],
+      "description": "Motivo del bloqueo. No null si y solo si state = blocked.",
+      "additionalProperties": false,
+      "required": ["statusCode", "message"],
+      "properties": {
+        "statusCode": { "type": "integer" },
+        "message": { "type": "string" },
+        "error": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

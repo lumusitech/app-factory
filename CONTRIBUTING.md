@@ -98,9 +98,28 @@ es el que queda en `main`. Escribilo en consecuencia.
 | Comentarios de código | inglés |
 | Documentación (`docs/`, este archivo) | español |
 | Mensajes de commit y títulos de PR | español |
+| Tokens de Conventional Commits y prefijos de rama | inglés (`feat`, `fix`, `docs`, `chore`) |
 | Textos de interfaz | español (i18n: `es`, `en`, `pt`) |
 
 Sin tildes, `ñ` ni espacios en nombres de archivo.
+
+### 4.1 Por qué español, y cuándo pasar a inglés
+
+Se mantiene el español porque la audiencia actual de commits, PRs y docs es el
+equipo que lee español: no hay contribuidores externos ni changelog público.
+Escribir en un idioma no nativo agrega fricción sin un lector que la justifique
+— el mismo criterio que §2: no optimizar para una audiencia hipotética.
+
+**Disparador de cambio a inglés** — se reevalúa ante cualquiera de estos:
+
+1. el primer contribuidor externo (un PR que no sea del equipo);
+2. el primer consumidor externo o cliente con repo propio (D2);
+3. una distribución pública con changelog donde el alcance en inglés importe;
+4. alguien en el equipo que no lea español.
+
+Es una decisión **reversible**: el cambio de idioma aplica *hacia adelante*; el
+historial ya escrito no se reescribe. Regla dura: **un artefacto, un idioma** —
+no se mezclan prosa en español e inglés dentro del mismo documento, commit o PR.
 
 ---
 

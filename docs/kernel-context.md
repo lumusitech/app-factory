@@ -72,14 +72,13 @@ Sirve como *evidencia*, no como plantilla. Se queda como demo de ese producto y
 contratos, y el repo solo aporta la *semántica* de idempotencia y sync, que ya
 está validada por tests.
 
-### 1.3 El portafolio: cuatro productos
+### 1.3 El portafolio: tres productos
 
 | Producto | Cliente | Tenant | Offline | Orden |
 |---|---|---|---|---|
 | **teacher-service** | docente individual | el docente | sí (aula sin wifi) | **1º** |
 | **store-service** | kiosco, almacén, vendedor de ropa | el comercio | **sí, crítico** (vender sin internet) | 2º |
 | **tech-service** | taller de servicios técnicos | el negocio | sí | 3º |
-| **school-service** | dirección de escuela | institución (jerárquico) | parcial | 4º |
 
 **Por qué ese orden**:
 
@@ -90,8 +89,12 @@ está validada por tests.
 2. **store-service** — exige offline fuerte (vender sin conexión) e inventario.
    Es donde el protocolo de sync se rompe **a propósito**.
 3. **tech-service** — llega con el kernel ya validado dos veces.
-4. **school-service** — la más compleja. Producto independiente: **no** unifica
-   planillas de `teacher-service` (ver T14 en su documento).
+
+**`school-service` se descarta** (D18): un producto de dirección escolar exige
+jerarquía multi-nivel, permisos por curso y consolidación entre docentes. No es
+viable como cuarta vertical por ahora. Consecuencia: el portafolio son tres
+productos y **ningún vertical necesita jerarquía de tenants** — el tenant es
+plano. Si algún día aparece, se evalúa con el mismo test de §2, no se pre-diseña.
 
 El `tech-service` original **no se adapta**: queda como demo de ese producto y
 como fuente de *semántica*, no de código (ver D17).
@@ -100,26 +103,26 @@ como fuente de *semántica*, no de código (ver D17).
 
 Lo que el kernel debe satisfacer. La columna "Veredicto" es la regla de §2.
 
-| Capacidad | teacher | store | tech | school | Veredicto |
-|---|---|---|---|---|---|
-| Identidad + roles | ✓ | ✓ | ✓ | ✓ | kernel — solo la **mecánica**, no el catálogo |
-| Tenant | docente | comercio | negocio | institución jerárquica | kernel — con jerarquía **opcional** |
-| **Sync offline + idempotencia** | ✓ | ✓✓ | ✓ | ✓ | **kernel — el pilar más fuerte** |
-| **Acceso público por token/QR** | ✓ | ✓ | ✓ | probable | **kernel — segundo pilar** |
-| Configuración por tenant | ✓ | ✓ | ✓ | ✓ | **kernel (`kernel-config`)** |
-| Storage de archivos | ✓ | ✓ | ✓ | ✓ | kernel — puerto |
-| Documentos / PDF | ✓ | ✓ | ✓ | ✓ | kernel — render; **plantillas locales** |
-| Notificaciones | ✓ | ✓ | ✓ | ✓ | kernel — transporte, no catálogo |
-| Scheduling | ✓ | ✓ | ✓ | ✓ | kernel |
-| Billing de plataforma | ✓ | ✓ | ✓ | ✓ | kernel — diferido |
-| Auditoría / log de eventos | ✓ | ✓ | ✓ | ✓ | kernel (outbox, D10) |
-| Órdenes / notas / stock / cursos | local | local | local | local | **❌ vertical** |
+| Capacidad | teacher | store | tech | Veredicto |
+|---|---|---|---|---|
+| Identidad + roles | ✓ | ✓ | ✓ | kernel — solo la **mecánica**, no el catálogo |
+| Tenant | docente | comercio | negocio | kernel — **plano** (sin jerarquía) |
+| **Sync offline + idempotencia** | ✓ | ✓✓ | ✓ | **kernel — el pilar más fuerte** |
+| **Acceso público por token/QR** | ✓ | ✓ | ✓ | **kernel — segundo pilar** |
+| Configuración por tenant | ✓ | ✓ | ✓ | **kernel (`kernel-config`)** — entra el día 1 (D19) |
+| Storage de archivos | ✓ | ✓ | ✓ | kernel — puerto |
+| Documentos / PDF | ✓ | ✓ | ✓ | kernel — render; **plantillas locales** |
+| Notificaciones | ✓ | ✓ | ✓ | kernel — transporte, no catálogo |
+| Scheduling | ✓ | ✓ | ✓ | kernel |
+| Billing de plataforma | ✓ | ✓ | ✓ | kernel — diferido |
+| Auditoría / log de eventos | ✓ | ✓ | ✓ | kernel (outbox, D10) |
+| Órdenes / notas / stock / cursos | local | local | local | **❌ vertical** |
 
-**Dos pilares confirmados por las cuatro verticales**: sync offline con
+**Dos pilares confirmados por las tres verticales**: sync offline con
 idempotencia, y acceso público por token. Ninguno de los dos se habría
 identificado con una sola app — es la demostración empírica de la regla de §2.
 
-**Advertencia sobre el alcance**: la intersección de cuatro productos es
+**Advertencia sobre el alcance**: la intersección de tres productos es
 **sorprendentemente chica**. Todo lo demás (`activos`, `dispositivos`, `stock`,
 `cursos`, `órdenes`) es vertical. El kernel arranca flaco a propósito.
 
@@ -270,6 +273,60 @@ necesita. Ordenados por fuerza:
 **No se implementan ahora.** Entran al kernel cuando la segunda vertical los
 pida; si solo los pide una, se quedan en la vertical.
 
+### D19 — `kernel-config` entra el día 1, no se difiere
+Es el único candidato de D18 que se promueve sin esperar a la segunda vertical.
+Razón: **las tres verticales lo necesitan con la misma semántica** (calendario,
+umbrales, plantillas, catálogos, flags por tenant). Diferirlo obliga a inventar
+un mecanismo de configuración por vertical y luego unificarlo — trabajo doble.
+Alcance mínimo: almacén clave-valor por tenant con esquema versionado y
+validación. No es un CMS ni un motor de reglas.
+
+### D20 — `tools/create-vertical` está implementado
+D3 deja de ser una intención y pasa a ser una herramienta disponible. Genera una
+vertical dentro del monorepo ya cableada a sync, scope, configuración y tests.
+Consecuencia: la fase 4 no se difiere; se usa desde la primera vertical.
+
+### D21 — `tech-service` es greenfield: no se copia ni se migra
+No hay extracción de código, ni convivencia de frameworks, ni adaptación de
+NestJS. Se escribe desde cero con el stack de D4 (Fastify + Zod) consumiendo el
+kernel. El repo original queda **solo** como fuente de semántica (idempotencia,
+sync) y como demo de ese producto.
+
+### D22 — Reglas de ingeniería obligatorias
+Aplican a todas las verticales y al kernel. No son recomendaciones.
+
+| Regla | Alcance | Verificación |
+|---|---|---|
+| **Mobile-first** | Toda la UI. Se diseña para el celular primero; el desktop es una adaptación | Revisión en viewport móvil antes de aprobar el PR |
+| **PWA instalable** | Android e iOS. La app debe instalarse y funcionar como app nativa | Test manual de instalación + Lighthouse PWA |
+| **Tailwind v4+** | Estilos. Sin CSS ad-hoc ni librerías de componentes que impongan su propio design system | Configuración única en `kernel-ui` |
+| **TDD obligatorio** | Toda implementación. Tests escritos antes o junto con el código | Cobertura de **bordes** y **rutas críticas**; CI bloquea si baja |
+
+**Lo que "bordes y rutas críticas" significa en la práctica**: no se exige 100%
+de cobertura. Se exige que estén cubiertos los caminos que rompen el producto —
+errores de red, reintentos, duplicados, estados vacíos, permisos denegados,
+límites de fecha y de monto. Un test que solo repite el camino feliz no cuenta.
+
+### D23 — Organic Driven Development (ODD)
+El sistema crece **orgánicamente desde contratos y necesidades reales**, no desde
+especulaciones. Reglas operativas:
+
+1. **Nada entra al kernel sin un consumidor real.** La intersección de §2 manda;
+   lo que solo una vertical necesita se queda en la vertical.
+2. **El contrato precede al código.** Primero la interfaz y los invariantes;
+   después la implementación. Cambiar el contrato es un evento explícito (ADR),
+   no un efecto colateral de escribir código.
+3. **La segunda instancia valida la abstracción.** La primera vertical registra
+   candidatos; la segunda confirma o descarta. Generalizar con n=1 está
+   prohibido (§8, riesgos).
+4. **Se poda.** Un paquete que ningún vertical consume se elimina o se degrada a
+   la vertical. Un kernel que crece sin poda se convierte en framework.
+5. **Cada feature deja el sistema más simple, no más acoplado.** Si un cambio
+   agrega dependencias cruzadas entre verticales, está mal.
+
+ODD es el criterio para resolver lo que los documentos no previeron: ante la
+duda, se elige lo que mantiene la intersección pequeña y el acoplamiento bajo.
+
 ---
 
 ## 4. Arquitectura objetivo
@@ -295,14 +352,14 @@ app-factory/
 ├── apps/
 │   ├── teacher-service/      # 1º — docente individual (docs/teacher-service-context.md)
 │   ├── store-service/        # 2º — kiosco / almacén / ropa
-│   ├── tech-service/         # 3º — taller técnico (reescritura desde cero)
-│   └── school-service/       # 4º — dirección de escuela
+│   └── tech-service/         # 3º — taller técnico (greenfield: desde cero, sin NestJS)
 └── tools/
-    └── create-vertical/      # D3 — diferido hasta la 3ª vertical
+    └── create-vertical/      # D3 — implementado, listo para generar verticales
 ```
 
-> `kernel-ui` y `tools/create-vertical` quedan **planificados pero diferidos**
-> (ver §9). No se crean vacíos: aparecen cuando la segunda vertical los pida.
+> `tools/create-vertical` está **implementado** (D20). `kernel-ui` y los demás
+> paquetes de borde aparecen cuando una vertical los consuma por primera vez;
+> no se crean vacíos.
 
 **Por qué el kernel se divide por runtime y no por capa**: `kernel-domain` y
 `kernel-contracts` son compartidos; el resto son adaptadores. Un paquete de
@@ -372,13 +429,14 @@ Y una lista de **"esto no se extrae y por qué"**.
 | **1** | `kernel-domain` + `kernel-contracts` | Compila sin ninguna dependencia externa |
 | **2** | `kernel-http` + `kernel-persistence` + `kernel-scope` | Un agregado con invariantes persiste, emite outbox y respeta alcance |
 | **3** | `kernel-client` + `kernel-conformance` | El test de convergencia pasa end-to-end |
-| **4** | *(diferido)* `tools/create-vertical` | Genera una vertical cableada y con tests verdes |
+| **4** | `tools/create-vertical` | **Implementado** (D20). Genera una vertical cableada y con tests verdes |
 | **5** | `teacher-service` **delgado**: un curso, una entidad, offline | Converge. Si no converge, el kernel no está hecho |
 | **6** | `store-service` | Rompe el protocolo de sync **a propósito**. Disparador legítimo de evaluar Nx |
-| **7** | `tech-service` | Con el kernel validado dos veces |
+| **7** | `tech-service` | Greenfield desde cero (sin NestJS), con el kernel ya validado dos veces |
 
-`school-service` queda fuera de este plan: es el último y depende de que el
-kernel esté maduro.
+`school-service` **sale del portafolio** (D18): requiere adopción institucional y
+jerarquía multi-nivel que ninguna vertical actual necesita. No se planifica ni
+se pre-diseña.
 
 **La fase 3 es la que se salta todo el mundo.** Un kernel no está "hecho" hasta
 que soporta: *crear entidad → trabajar offline → sincronizar → converger →
@@ -407,25 +465,24 @@ reintentar sin duplicar*. Si eso no pasa, es una carpeta de utilidades.
 | # | Antes | Ahora |
 |---|---|---|
 | 1 | ¿Multi-tenant o single-tenant? | **Multi-tenant**, un despliegue por producto con N tenants (D16). `teacher-service` instancia esto con **tenant = docente** |
-| 2 | Inventario de las verticales | Hecho: 4 productos y su intersección (§1.3, §1.4) |
+| 2 | Inventario de las verticales | Hecho: 3 productos y su intersección (§1.3, §1.4) |
 | 3 | ¿Registry privado? | Se mantiene `workspace:*` + changesets. Registry solo si un cliente exige repo propio (D2) |
 | 4 | ¿La app Android consume el mismo protocolo? | Sí: el protocolo es documento + JSON Schema (D14). Cualquier cliente puede implementarlo |
-| 5 | ¿`kernel-ui` desde el inicio? | **Pospuesto** hasta que la segunda vertical lo pida |
-| 6 | Nombres de las verticales | `teacher-service`, `store-service`, `tech-service`, `school-service` |
+| 5 | ¿`kernel-ui` desde el inicio? | **Sí** (D22): mobile-first, PWA y Tailwind v4+ son obligatorios, así que las primitivas de UI se necesitan desde la primera vertical |
+| 6 | Nombres de las verticales | `teacher-service`, `store-service`, `tech-service` |
+| 7 | ¿Reglas de ingeniería obligatorias? | **Mobile-first, PWA instalable (Android/iOS), Tailwind v4+ y TDD** (D22, D23). Detalle en §12 y en `CONTRIBUTING.md` §8–§9 |
+| 8 | ¿`school-service` sigue en el portafolio? | **No** (D18). Se descarta: exige adopción institucional y jerarquía multi-nivel que ninguna vertical necesita |
 
 ### Siguen abiertas
 
-1. **¿`kernel-config` entra desde el día 1 o se valida con `store-service`?**
-   (D18). Es el candidato más fuerte, pero la regla de §2 dice esperar.
-2. **¿La jerarquía de tenant entra en el kernel desde el día 1?**
-   `teacher-service` no la necesita (escuela = atributo, T2); `school-service`
-   sí (colegio → curso). Decisión pendiente: pagar la jerarquía ahora, barata,
-   o esperar.
-3. **¿`tools/create-vertical` (D3) se implementa o se difiere?**
-   Probablemente diferido hasta la tercera vertical.
-4. **Nombre comercial de cada producto.** `teacher-service` y los demás son
-   nombres internos de repo.
-5. **¿Se adopta `changesets` en la fase 0 o al publicar el primer paquete?**
+1. **Nombre comercial de cada producto.** `teacher-service` y los demás son
+   nombres internos de repo. El comercial se define antes de difundir.
+2. **¿Se adopta `changesets` en la fase 0 o al publicar el primer paquete?**
+   Recomendación: declarar `"version"` en cada `package.json` desde el día 1 y
+   adoptar la herramienta recién cuando exista un consumidor externo real.
+3. **¿La jerarquía de tenant se implementa alguna vez?**
+   Ninguna de las tres verticales la necesita. Se evalúa **solo** si aparece un
+   producto que la exija, con el test de §2. No es deuda latente.
 
 ---
 
@@ -495,6 +552,44 @@ Detalle operativo y convenciones: **`CONTRIBUTING.md`**.
 
 Regla de trabajo: **un chat por feature o micro-cambio.** El chat cita el
 documento, no la memoria de conversaciones anteriores.
+
+---
+
+## 12. Reglas de ingeniería obligatorias
+
+Aplican a todas las verticales y a los paquetes del kernel. **No son
+recomendaciones: son criterios de aceptación de PR.** Detalle operativo en
+`CONTRIBUTING.md` §8 y §9.
+
+### 12.1 Mobile-First y PWA (D22, T24)
+
+| Regla | Verificación |
+|---|---|
+| **Mobile-first**: la UI se resuelve primero en 375 px; el desktop es adaptación | Revisión en viewport móvil antes de aprobar |
+| **PWA instalable** en Android e iOS: manifiesto, service worker, caché de assets | Test manual de instalación + Lighthouse PWA |
+| **Tailwind v4+** como sistema de estilos, configurado en `kernel-ui` | Sin CSS ad-hoc ni design systems ajenos |
+| **Targets de toque** de 44 px mínimo; nada depende de `hover` | Revisión de UI |
+
+Consecuencia de arquitectura: `kernel-ui` y `kernel-client` (service worker +
+cola offline) se necesitan **desde la primera vertical**, no en la segunda.
+
+### 12.2 TDD obligatorio (D22, T25)
+
+| Regla | Verificación |
+|---|---|
+| Tests escritos **antes o junto** con el código | El PR incluye los tests del cambio |
+| Cobertura de **bordes y rutas críticas**, no 100% de líneas | Errores de red, reintentos, duplicados, estados vacíos, permisos, límites |
+| El **camino feliz no cuenta** como cobertura | Un test que solo verifica que guardar funciona no prueba nada |
+| El **CI bloquea el merge** si un test falla o baja la cobertura crítica | Configuración de CI |
+| Un PR sin tests no se aprueba | Checklist de PR |
+
+### 12.3 Organic Driven Development — ODD (D23)
+
+1. Nada entra al kernel sin un consumidor real (§2, intersección).
+2. El contrato precede al código; cambiarlo es un evento explícito (ADR).
+3. La segunda instancia valida la abstracción; generalizar con n=1 está prohibido.
+4. Se poda: un paquete sin consumidores se elimina o se degrada a la vertical.
+5. Cada feature deja el sistema más simple y menos acoplado, no más.
 
 ---
 

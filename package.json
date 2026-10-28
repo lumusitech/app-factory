@@ -1,0 +1,17 @@
+{
+  "name": "app-factory",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Monorepo del kernel compartido entre verticales de producto.",
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": "^22 || ^24 || >=26"
+  },
+  "scripts": {
+    "boundary:check": "depcruise --config tools/boundary-rules/dependency-cruiser.config.cjs .",
+    "boundary:selftest": "node tools/boundary-rules/self-test.mjs"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "^18"
+  }
+}

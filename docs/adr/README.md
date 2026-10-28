@@ -33,4 +33,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 
 | # | Título | Estado |
 |---|---|---|
-| — | *(sin ADRs todavía)* | — |
+| [0001](0001-decisiones-contrato-idempotencia.md) | Decisiones del contrato de idempotencia | propuesto |

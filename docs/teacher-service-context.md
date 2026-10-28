@@ -10,8 +10,9 @@
 
 - **Para humanos**: §1 explica el producto, §2 las decisiones ya cerradas, §4
   el alcance por versión.
-- **Para agentes**: §2 es vinculante (no re-litigar), §3 es el modelo de datos
-  (cambiarlo exige ADR), §7 son prohibiciones duras, §10 es lo único abierto.
+- **Para agentes**: §2 es vinculante (no re-litigar) — **T24 (mobile-first/PWA)
+  y T25 (TDD) son obligatorias**. §3 es el modelo de datos (cambiarlo exige ADR),
+  §7 son prohibiciones duras, §10 es lo único abierto.
 - **Un chat por feature o micro-cambio.** Cada chat cita el ID (`F-xx`) y este
   documento. No se trabaja sobre memoria de conversaciones anteriores.
 
@@ -127,9 +128,11 @@ cuándo se dictó realmente y por qué se movió.
 El docente ya tiene los datos. Pedirle que los tipee de nuevo es la forma más
 rápida de perderlo.
 
-### T14 — `school-service` no unifica planillas
-Requiere adopción institucional, que en este mercado no está garantizada. Es un
-producto separado, futuro, y no condiciona el modelo de `teacher-service`.
+### T14 — `school-service` queda fuera del portafolio
+Se descarta como producto: requiere adopción institucional y jerarquía
+multi-nivel que ninguna vertical actual necesita. `teacher-service` no depende
+de él ni espera integrarse con él. Si alguna vez se construye, será un producto
+independiente con su propio modelo.
 
 ### T15 — Jurisdicción inicial: Provincia de Buenos Aires
 Región inicial: Malvinas Argentinas (Grand Bourg, Polvorines), San Miguel,
@@ -186,6 +189,39 @@ Primer usuario: el propio autor del producto.
 ### T23 — Nombre: `teacher-service` como nombre interno
 El repo, los paquetes y las rutas usan `teacher-service`. El nombre comercial se
 define antes de difundir.
+
+### T24 — Mobile-first con PWA instalable
+El docente carga asistencia y notas **desde el celular**, en el aula, con el
+teléfono en la mano. El escritorio es la excepción (planificación, informes).
+
+- **Diseño mobile-first**: se resuelve primero en pantalla de 375 px; el layout
+  de escritorio es una adaptación, no el punto de partida.
+- **Tailwind v4+** como sistema de estilos, configurado en `kernel-ui`.
+- **PWA instalable** en Android e iOS: manifiesto, service worker y caché de
+  assets. Se instala desde el navegador y se abre como app nativa, sin stores.
+- **Targets de toque** de 44 px mínimo; nada que dependa de hover.
+- **Carga por teclado en escritorio** y por teclado numérico en móvil: el mismo
+  flujo, distinto input.
+
+Consecuencia para el kernel: `kernel-ui` y `kernel-client` (service worker +
+cola offline) se necesitan **desde la primera vertical**, no en la segunda.
+
+### T25 — TDD obligatorio, con foco en bordes y rutas críticas
+Toda implementación se hace con tests. No se acepta código sin test que lo
+cubra.
+
+- **Tests primero o junto con el código**, nunca después.
+- **Cobertura de bordes y rutas críticas**, no 100% de líneas: errores de red,
+  reintentos, duplicados de sync, estados vacíos, permisos denegados, límites de
+  fecha y de rango de notas.
+- **El camino feliz no cuenta como cobertura**: un test que solo verifica que
+  guardar funciona no prueba nada.
+- **CI bloquea el merge** si los tests fallan o si baja la cobertura de las
+  rutas críticas.
+
+Consecuencia para el kernel: `kernel-conformance` es el arnés de pruebas de las
+rutas críticas de infraestructura (sync, idempotencia, alcance). El dominio de
+`teacher-service` se prueba aparte con sus propias reglas.
 
 ---
 
@@ -409,20 +445,21 @@ docente en dos dispositivos: última escritura gana, y la UI lo advierte.
 | **Renderizado de documentos (PDF)** | `kernel-documents` | **NUEVO — no contemplado** |
 | **Storage de archivos** | `kernel-storage` | **NUEVO — no contemplado** |
 | **Importación de planillas** | `kernel-import` o vertical | **NUEVO — decidir** |
-| **Configuración por tenant** (calendario, umbrales, plantillas) | `kernel-config` | **NUEVO — no contemplado** |
+| **Configuración por tenant** (calendario, umbrales, plantillas) | `kernel-config` | **CONFIRMADO — entra el día 1 (D19)** |
 | Plantillas de documentos | vertical (datos) | — |
 | Vistas derivadas / proyecciones | patrón, no paquete | — |
 
-Los cuatro "NUEVO" aparecen en `teacher-service` pero probablemente también en
-`store-service` (comprobante por QR, imágenes de producto, import de catálogo) y
-en `tech-service` (configuración por negocio). **No se implementan ahora**: se
+Los demás "NUEVO" (token público, PDF, storage, importación) aparecen en
+`teacher-service` pero probablemente también en `store-service` (comprobante por
+QR, imágenes de producto, import de catálogo). **No se implementan ahora**: se
 registran como candidatos para la segunda vertical, que es la que valida la
 intersección.
 
-Observación: **`kernel-config` es el candidato más fuerte**. Las cuatro apps
-necesitan configuración por tenant que no es código (calendario, umbrales,
-plantillas, catálogos). Es la misma familia que `business-settings` en
-`tech-service`, pero con semántica real de configuración y no de branding.
+**`kernel-config` no espera a la segunda vertical** (D19). Es el único que se
+promueve desde el día 1 porque las tres verticales lo necesitan con la misma
+semántica: configuración por tenant que no es código. Es la misma familia que
+`business-settings` en `tech-service`, pero con semántica real de configuración y
+no de branding.
 
 ---
 

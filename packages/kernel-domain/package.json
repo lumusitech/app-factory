@@ -1,0 +1,26 @@
+{
+  "name": "@kernel/domain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dominio puro del kernel (TypeScript, CERO dependencias): puertos y eventos de dominio.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

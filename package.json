@@ -9,7 +9,10 @@
   },
   "scripts": {
     "boundary:check": "depcruise --config tools/boundary-rules/dependency-cruiser.config.cjs .",
-    "boundary:selftest": "node tools/boundary-rules/self-test.mjs"
+    "boundary:selftest": "node tools/boundary-rules/self-test.mjs",
+    "build": "pnpm -r --filter \"./packages/*\" run build",
+    "typecheck": "pnpm -r --filter \"./packages/*\" run typecheck",
+    "test": "pnpm -r --filter \"./packages/*\" run test"
   },
   "devDependencies": {
     "dependency-cruiser": "^18"

@@ -8,8 +8,9 @@ código**: solo documentación de arquitectura y de producto.
 
 ## Estado
 
-**Fase 0** — contratos (sección 5 de `kernel-context.md`) y reglas de frontera en
-CI. Sin código todavía.
+**Fase 1** — `kernel-domain` y `kernel-contracts` (TypeScript puro, **cero
+dependencias externas** en runtime). Fase 0 cerrada: contratos y reglas de
+frontera en CI.
 
 ## Mapa del repositorio
 
@@ -21,7 +22,9 @@ app-factory/
 │   ├── kernel-context.md     # arquitectura del kernel y decisiones D1–D25
 │   ├── teacher-service-context.md
 │   └── adr/                  # Architecture Decision Records
-├── packages/                 # kernel (a crear, fase 1+)
+├── packages/
+│   ├── kernel-domain/        # dominio puro: puertos + DomainEvent (cero deps)
+│   └── kernel-contracts/     # envelope, headers, códigos y protocolo de sync
 ├── apps/                     # verticales (a crear, fase 5+)
 └── tools/                    # create-vertical (implementado)
 ```

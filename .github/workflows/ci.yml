@@ -29,3 +29,30 @@ jobs:
 
       - name: Self-test del gate (dispara y no sobre-dispara)
         run: pnpm boundary:selftest
+
+  kernel:
+    name: kernel (typecheck + tests + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (incluye los contratos de tipo)
+        run: pnpm typecheck
+
+      - name: Tests (bloquean el merge si fallan, CONTRIBUTING §8.4)
+        run: pnpm test
+
+      - name: Build del kernel
+        run: pnpm build

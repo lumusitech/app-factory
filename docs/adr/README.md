@@ -38,3 +38,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 | [0003](0003-decisiones-contrato-alcance.md) | Decisiones del contrato de alcance | propuesto |
 | [0004](0004-decisiones-contrato-evolucion.md) | Decisiones del contrato de evolución | propuesto |
 | [0005](0005-decisiones-fase-1-kernel-domain-y-contracts.md) | Materialización de `kernel-domain` y `kernel-contracts` | propuesto |
+| [0006](0006-decisiones-fase-2-kernel-http-persistence-scope.md) | Materialización de `kernel-http`, `kernel-persistence` y `kernel-scope` | propuesto |

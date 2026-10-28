@@ -22,6 +22,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@kernel/config": "workspace:*",
     "@kernel/contracts": "workspace:*",
     "@kernel/domain": "workspace:*",
     "@kernel/scope": "workspace:*",

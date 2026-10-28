@@ -60,7 +60,9 @@ test('la fixture `violation` hace fallar al gate con el set exacto de reglas', (
     'kernel-contracts-is-framework-free',
     'kernel-does-not-import-apps',
     'kernel-domain-is-framework-free',
+    'kernel-scope-is-framework-free',
     'no-cross-app-imports',
+    'scope-resolution-only-in-kernel-scope',
   ]);
 });
 

@@ -10,6 +10,8 @@ export type { ErrorCode } from './error-codes.js';
 export { ERROR_CODES, ERROR_STATUS, isErrorCode } from './error-codes.js';
 export type { HeaderName } from './headers.js';
 export { CONNECTIVITY_PROBE_VALUE, HEADERS, isConnectivityProbe } from './headers.js';
+export type { IdempotencyRecord, IdempotencyStore } from './idempotency.js';
+export { IDEMPOTENCY_TTL_HOURS, idempotencyExpiry } from './idempotency.js';
 export type {
   QueuedRequest,
   QueuedRequestBlockedReason,

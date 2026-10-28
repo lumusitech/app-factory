@@ -47,6 +47,20 @@ const boundaryRules = [
     from: { path: '^packages/kernel-contracts/', pathNot: TEST_FILES },
     to: { dependencyTypesNot: ['local', 'core'] },
   },
+  {
+    name: 'kernel-scope-is-framework-free',
+    severity: 'error',
+    comment: '§4/ADR 0006: kernel-scope solo importa módulos locales y core (node:async_hooks); cero deps npm (fuera de tests).',
+    from: { path: '^packages/kernel-scope/', pathNot: TEST_FILES },
+    to: { dependencyTypesNot: ['local', 'core'] },
+  },
+  {
+    name: 'scope-resolution-only-in-kernel-scope',
+    severity: 'error',
+    comment: 'scope.md §8 / D11: la resolución de alcance (AsyncLocalStorage) vive solo en kernel-scope; ningún otro paquete importa async_hooks.',
+    from: { pathNot: '^packages/kernel-scope/' },
+    to: { path: '^(node:)?async_hooks$' },
+  },
 ];
 
 module.exports = { boundaryRules };

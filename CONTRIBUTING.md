@@ -11,7 +11,7 @@
 Leer, en este orden:
 
 1. [`docs/kernel-context.md`](docs/kernel-context.md) — arquitectura del kernel,
-   decisiones `D1`–`D22`, prohibiciones duras.
+   decisiones `D1`–`D25`, prohibiciones duras.
 2. El documento del producto que vas a tocar, por ejemplo
    [`docs/teacher-service-context.md`](docs/teacher-service-context.md) —
    decisiones `T1`–`T25`, modelo de datos, alcance por versión (`F-xx`).

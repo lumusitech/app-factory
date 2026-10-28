@@ -327,6 +327,35 @@ especulaciones. Reglas operativas:
 ODD es el criterio para resolver lo que los documentos no previeron: ante la
 duda, se elige lo que mantiene la intersección pequeña y el acoplamiento bajo.
 
+### D24 — Versionado: `"version"` desde el día 1, `changesets` diferido al primer consumidor externo
+
+D2 fija dos cosas: semver desde el día 1 y **no acoplarse al workspace**. Ambas
+se mantienen. Lo que se difiere es **la herramienta**, no la decisión. Con
+`workspace:*` el enlace interno resuelve por workspace, no por rango semver:
+mientras todo sea interno y `private`, los números de versión no gatean nada.
+Instalar `changesets` antes de tener un consumidor externo es ceremonia sin
+retorno y contradice ODD #1 (nada entra sin consumidor real).
+
+Consecuencia: cada `package.json` nace con `"version"` y `"private": true`; no
+se instala `@changesets/cli` ni se exige un changeset por PR. **Disparador de
+adopción**: el primer consumidor externo que necesite un artefacto versionado
+(registry o repo propio). Los `"version"` se suben manualmente en hitos, para
+que no mientan. No re-litiga D2: la cumple y secuencia su implementación.
+
+### D25 — Tenant plano: sin jerarquía y sin pre-diseñarla
+
+Ninguna de las tres verticales necesita sub-tenants; el tenant es **plano**
+(§1.3, D18). Pre-diseñar jerarquía (`parent_id`, resolución recursiva, permisos
+por ancestro/descendiente) está prohibido por §2 (la intersección, nunca la
+unión), ODD #1 (nada sin consumidor real) y ODD #3 (prohibido generalizar con
+n=1).
+
+Consecuencia: schema y scoping planos. La resolución de alcance vive en **un
+único seam** (`kernel-scope`, D11), de modo que un futuro producto jerárquico se
+evalúa con el test de §2 —y, por D16, probablemente sea otro producto con su
+propio despliegue— y el retrofit toca un solo paquete, no N verticales. El
+supuesto "tenant plano" se escribe explícito en el contrato de alcance (§5).
+
 ---
 
 ## 4. Arquitectura objetivo
@@ -398,9 +427,12 @@ Cuatro secciones, 6–8 páginas. Es el entregable real de la fase de diseño.
    hay merge**: conflicto = `blocked` + resolución humana. Es una decisión, no
    una carencia.
 3. **Contrato de alcance** — forma del `ScopeContext`, dónde se puebla, dónde se
-   aplica, y la prueba de que es imposible de omitir.
+   aplica, y la prueba de que es imposible de omitir. Incluye el supuesto
+   explícito de **tenant plano** (D25) y que la resolución de alcance vive solo
+   en `kernel-scope`.
 4. **Contrato de evolución** — dueño de migraciones por paquete, forward-only,
-   procedimiento de squash.
+   procedimiento de squash. Incluye el **disparador de adopción de `changesets`**
+   (D24).
 
 Y una lista de **"esto no se extrae y por qué"**.
 
@@ -466,23 +498,24 @@ reintentar sin duplicar*. Si eso no pasa, es una carpeta de utilidades.
 |---|---|---|
 | 1 | ¿Multi-tenant o single-tenant? | **Multi-tenant**, un despliegue por producto con N tenants (D16). `teacher-service` instancia esto con **tenant = docente** |
 | 2 | Inventario de las verticales | Hecho: 3 productos y su intersección (§1.3, §1.4) |
-| 3 | ¿Registry privado? | Se mantiene `workspace:*` + changesets. Registry solo si un cliente exige repo propio (D2) |
+| 3 | ¿Registry privado? | Se mantiene `workspace:*`; registry solo si un cliente exige repo propio (D2). La herramienta `changesets` se difiere hasta el primer consumidor externo (D24) |
 | 4 | ¿La app Android consume el mismo protocolo? | Sí: el protocolo es documento + JSON Schema (D14). Cualquier cliente puede implementarlo |
 | 5 | ¿`kernel-ui` desde el inicio? | **Sí** (D22): mobile-first, PWA y Tailwind v4+ son obligatorios, así que las primitivas de UI se necesitan desde la primera vertical |
 | 6 | Nombres de las verticales | `teacher-service`, `store-service`, `tech-service` |
 | 7 | ¿Reglas de ingeniería obligatorias? | **Mobile-first, PWA instalable (Android/iOS), Tailwind v4+ y TDD** (D22, D23). Detalle en §12 y en `CONTRIBUTING.md` §8–§9 |
 | 8 | ¿`school-service` sigue en el portafolio? | **No** (D18). Se descarta: exige adopción institucional y jerarquía multi-nivel que ninguna vertical necesita |
+| 9 | ¿`changesets` en la fase 0 o al publicar el primer paquete? | **Diferido** (D24). `"version"` + `"private": true` desde el día 1; la herramienta se adopta con el primer consumidor externo real. Cumple D2 y secuencia su implementación |
+| 10 | ¿Se implementa alguna vez la jerarquía de tenant? | **No, nunca pre-diseñada** (D25). Tenant plano; la resolución de alcance vive en el seam único `kernel-scope`. Se reevalúa solo si un producto la exige, con el test de §2 |
 
-### Siguen abiertas
+### Diferidas (no bloquean ninguna fase)
 
-1. **Nombre comercial de cada producto.** `teacher-service` y los demás son
-   nombres internos de repo. El comercial se define antes de difundir.
-2. **¿Se adopta `changesets` en la fase 0 o al publicar el primer paquete?**
-   Recomendación: declarar `"version"` en cada `package.json` desde el día 1 y
-   adoptar la herramienta recién cuando exista un consumidor externo real.
-3. **¿La jerarquía de tenant se implementa alguna vez?**
-   Ninguna de las tres verticales la necesita. Se evalúa **solo** si aparece un
-   producto que la exija, con el test de §2. No es deuda latente.
+1. **Nombre comercial de cada producto.** `teacher-service`, `store-service` y
+   `tech-service` son nombres internos de repo. **Decisión: se difiere** al
+   momento de la distribución real; hasta entonces se usan los nombres internos.
+   No bloquea ninguna fase.
+
+Con D24 y D25 no quedan preguntas de §9 que bloqueen el avance. La fase 0
+(contratos + reglas de frontera) queda desbloqueada.
 
 ---
 

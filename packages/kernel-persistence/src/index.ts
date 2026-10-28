@@ -23,6 +23,7 @@ export type {
   SqlExecutor,
 } from './executor.js';
 export { PgIdempotencyStore } from './idempotency-store.js';
+export { PgConfigEntryRepository } from './config-entry-repository.js';
 export {
   InvalidMigrationNameError,
   MigrationChecksumMismatchError,

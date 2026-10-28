@@ -170,6 +170,25 @@ importers:
         specifier: ^18
         version: 18.7.0
 
+  packages/kernel-config:
+    dependencies:
+      '@kernel/domain':
+        specifier: workspace:*
+        version: link:../kernel-domain
+      '@kernel/scope':
+        specifier: workspace:*
+        version: link:../kernel-scope
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.5
+        version: 26.6.5
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@26.6.5)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
+
   packages/kernel-contracts:
     devDependencies:
       '@types/node':
@@ -221,6 +240,9 @@ importers:
       '@electric-sql/pglite':
         specifier: ^0.5.13
         version: 0.5.13
+      '@kernel/config':
+        specifier: workspace:*
+        version: link:../kernel-config
       '@kernel/persistence':
         specifier: workspace:*
         version: link:../kernel-persistence
@@ -236,6 +258,9 @@ importers:
 
   packages/kernel-persistence:
     dependencies:
+      '@kernel/config':
+        specifier: workspace:*
+        version: link:../kernel-config
       '@kernel/contracts':
         specifier: workspace:*
         version: link:../kernel-contracts

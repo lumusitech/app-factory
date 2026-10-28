@@ -7,6 +7,10 @@ Monorepo del **kernel compartido** entre verticales de producto.
 
 ## Estado
 
+**Fase 2b** — `kernel-config`: configuración por tenant con **esquema versionado**
+y validación (clave-valor, validación inyectada por la vertical). Decisiones en el
+[ADR 0007](docs/adr/0007-decisiones-kernel-config.md).
+
 **Fase 2** — `kernel-http` + `kernel-persistence` + `kernel-scope`: un agregado
 con invariantes persiste, emite outbox en la misma transacción y respeta alcance
 (ver `packages/kernel-http/test/exit-criterion.test.ts`). Decisiones en el
@@ -31,6 +35,7 @@ app-factory/
 │   ├── kernel-domain/        # dominio puro: puertos + DomainEvent (cero deps)
 │   ├── kernel-contracts/     # envelope, headers, códigos y protocolo de sync
 │   ├── kernel-scope/         # ScopeContext + ALS, único seam de alcance
+│   ├── kernel-config/        # configuración por tenant con esquema versionado
 │   ├── kernel-persistence/   # driver SQL, outbox, migraciones e idempotencia
 │   └── kernel-http/          # Fastify + Zod: envelope, errores, alcance, idempotencia
 ├── apps/                     # verticales (a crear, fase 5+)

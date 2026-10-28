@@ -57,6 +57,8 @@ test('la fixture `violation` hace fallar al gate con el set exacto de reglas', (
 
   // Detalle: qué reglas dispararon.
   assert.deepEqual(violatedRules('violation'), [
+    'kernel-config-is-framework-free',
+    'kernel-config-no-adapters',
     'kernel-contracts-is-framework-free',
     'kernel-does-not-import-apps',
     'kernel-domain-is-framework-free',

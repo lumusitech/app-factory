@@ -112,7 +112,8 @@ app-factory/
 ├── LICENSE                   # MIT (c) 2026 LumusiTech
 ├── docs/
 │   ├── kernel-context.md     # arquitectura del kernel
-│   └── teacher-service-context.md
+│   ├── teacher-service-context.md
+│   └── adr/                  # Architecture Decision Records
 ├── packages/                 # kernel (a crear)
 ├── apps/                     # verticales (a crear)
 └── tools/                    # create-vertical (implementado)

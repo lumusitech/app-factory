@@ -72,6 +72,57 @@ Sirve como *evidencia*, no como plantilla. Se queda como demo de ese producto y
 contratos, y el repo solo aporta la *semántica* de idempotencia y sync, que ya
 está validada por tests.
 
+### 1.3 El portafolio: cuatro productos
+
+| Producto | Cliente | Tenant | Offline | Orden |
+|---|---|---|---|---|
+| **teacher-service** | docente individual | el docente | sí (aula sin wifi) | **1º** |
+| **store-service** | kiosco, almacén, vendedor de ropa | el comercio | **sí, crítico** (vender sin internet) | 2º |
+| **tech-service** | taller de servicios técnicos | el negocio | sí | 3º |
+| **school-service** | dirección de escuela | institución (jerárquico) | parcial | 4º |
+
+**Por qué ese orden**:
+
+1. **teacher-service** — dominio chico, **un solo escritor por tenant** (sin
+   conflictos de sync), offline real y acceso público por QR. Valida el kernel
+   completo sin necesitar resolución de conflictos. Es el test de aceptación más
+   barato. Contexto propio: `docs/teacher-service-context.md`.
+2. **store-service** — exige offline fuerte (vender sin conexión) e inventario.
+   Es donde el protocolo de sync se rompe **a propósito**.
+3. **tech-service** — llega con el kernel ya validado dos veces.
+4. **school-service** — la más compleja. Producto independiente: **no** unifica
+   planillas de `teacher-service` (ver T14 en su documento).
+
+El `tech-service` original **no se adapta**: queda como demo de ese producto y
+como fuente de *semántica*, no de código (ver D17).
+
+### 1.4 La intersección verificada
+
+Lo que el kernel debe satisfacer. La columna "Veredicto" es la regla de §2.
+
+| Capacidad | teacher | store | tech | school | Veredicto |
+|---|---|---|---|---|---|
+| Identidad + roles | ✓ | ✓ | ✓ | ✓ | kernel — solo la **mecánica**, no el catálogo |
+| Tenant | docente | comercio | negocio | institución jerárquica | kernel — con jerarquía **opcional** |
+| **Sync offline + idempotencia** | ✓ | ✓✓ | ✓ | ✓ | **kernel — el pilar más fuerte** |
+| **Acceso público por token/QR** | ✓ | ✓ | ✓ | probable | **kernel — segundo pilar** |
+| Configuración por tenant | ✓ | ✓ | ✓ | ✓ | **kernel (`kernel-config`)** |
+| Storage de archivos | ✓ | ✓ | ✓ | ✓ | kernel — puerto |
+| Documentos / PDF | ✓ | ✓ | ✓ | ✓ | kernel — render; **plantillas locales** |
+| Notificaciones | ✓ | ✓ | ✓ | ✓ | kernel — transporte, no catálogo |
+| Scheduling | ✓ | ✓ | ✓ | ✓ | kernel |
+| Billing de plataforma | ✓ | ✓ | ✓ | ✓ | kernel — diferido |
+| Auditoría / log de eventos | ✓ | ✓ | ✓ | ✓ | kernel (outbox, D10) |
+| Órdenes / notas / stock / cursos | local | local | local | local | **❌ vertical** |
+
+**Dos pilares confirmados por las cuatro verticales**: sync offline con
+idempotencia, y acceso público por token. Ninguno de los dos se habría
+identificado con una sola app — es la demostración empírica de la regla de §2.
+
+**Advertencia sobre el alcance**: la intersección de cuatro productos es
+**sorprendentemente chica**. Todo lo demás (`activos`, `dispositivos`, `stock`,
+`cursos`, `órdenes`) es vertical. El kernel arranca flaco a propósito.
+
 ---
 
 ## 2. La regla que gobierna todo
@@ -177,6 +228,48 @@ implementarlo. El código es una implementación de referencia.
 
 Nx solo si la tercera vertical duele. Las reglas se necesitan antes que Nx.
 
+### D16 — La unidad es el **producto**, no el cliente
+Cada producto es **un despliegue** con N tenants adentro. No se crea una app por
+cliente.
+
+- Multi-tenant resuelve *"muchos clientes, un producto"*.
+- **No** resuelve *"muchos negocios distintos, un producto"*.
+
+Tres tipos de variación, con destinos distintos:
+
+| Variación | Destino |
+|---|---|
+| Marca, colores, logo | configuración por tenant (trivial) |
+| Reglas del mismo producto | flags / configuración por tenant |
+| **Workflow distinto** | **son productos distintos** |
+
+Intercambio aceptado: multi-tenant cambia *riesgo de aislamiento* por *salud
+operativa* (un bug afecta a todos los tenants; un deploy malo también). Se
+mitiga con flags por tenant y rollback.
+
+### D17 — `tech-service` **no se adapta**: se reescribe desde cero
+El repo original queda como demo y como fuente de *semántica* (idempotencia,
+sync), no de código. Consecuencia: **desaparece el problema de los dos
+adaptadores HTTP** — no hay convivencia Nest+TypeORM y Fastify+Zod.
+
+### D18 — Candidatos de kernel: se validan con la **segunda** vertical
+Registrados por `teacher-service`, se confirman solo si `store-service` los
+necesita. Ordenados por fuerza:
+
+1. **`kernel-config`** — configuración por tenant que no es código (calendario,
+   umbrales, plantillas, catálogos). **El candidato más fuerte**: es la misma
+   familia que `business-settings` en `tech-service`, pero con semántica real de
+   configuración y no de branding.
+2. **Acceso público por token** — opaco, revocable, con vencimiento opcional y
+   alcance definido. Nunca `WHERE code = ?` sobre un código corto.
+3. **Renderizado de documentos (PDF)** — puerto; las plantillas son datos de la
+   vertical.
+4. **Storage de archivos** — puerto.
+5. **Importación de planillas / catálogos** — decidir si es kernel o vertical.
+
+**No se implementan ahora.** Entran al kernel cuando la segunda vertical los
+pida; si solo los pide una, se quedan en la vertical.
+
 ---
 
 ## 4. Arquitectura objetivo
@@ -200,11 +293,16 @@ app-factory/
 │   ├── kernel-ui/            # tokens + primitivas (solo el borde es framework-specific)
 │   └── kernel-conformance/   # suite de convergencia (el "test de aceptación del kernel")
 ├── apps/
-│   ├── vertical-a/
-│   └── vertical-b/
+│   ├── teacher-service/      # 1º — docente individual (docs/teacher-service-context.md)
+│   ├── store-service/        # 2º — kiosco / almacén / ropa
+│   ├── tech-service/         # 3º — taller técnico (reescritura desde cero)
+│   └── school-service/       # 4º — dirección de escuela
 └── tools/
-    └── create-vertical/
+    └── create-vertical/      # D3 — diferido hasta la 3ª vertical
 ```
+
+> `kernel-ui` y `tools/create-vertical` quedan **planificados pero diferidos**
+> (ver §9). No se crean vacíos: aparecen cuando la segunda vertical los pida.
 
 **Por qué el kernel se divide por runtime y no por capa**: `kernel-domain` y
 `kernel-contracts` son compartidos; el resto son adaptadores. Un paquete de
@@ -274,9 +372,13 @@ Y una lista de **"esto no se extrae y por qué"**.
 | **1** | `kernel-domain` + `kernel-contracts` | Compila sin ninguna dependencia externa |
 | **2** | `kernel-http` + `kernel-persistence` + `kernel-scope` | Un agregado con invariantes persiste, emite outbox y respeta alcance |
 | **3** | `kernel-client` + `kernel-conformance` | El test de convergencia pasa end-to-end |
-| **4** | `tools/create-vertical` | Genera una vertical cableada y con tests verdes |
-| **5** | Vertical 2 **delgada** (una entidad, un flujo, offline) | Converge. Si no converge, el kernel no está hecho |
-| **6** | Vertical 3 | Es el disparador legítimo de evaluar Nx |
+| **4** | *(diferido)* `tools/create-vertical` | Genera una vertical cableada y con tests verdes |
+| **5** | `teacher-service` **delgado**: un curso, una entidad, offline | Converge. Si no converge, el kernel no está hecho |
+| **6** | `store-service` | Rompe el protocolo de sync **a propósito**. Disparador legítimo de evaluar Nx |
+| **7** | `tech-service` | Con el kernel validado dos veces |
+
+`school-service` queda fuera de este plan: es el último y depende de que el
+kernel esté maduro.
 
 **La fase 3 es la que se salta todo el mundo.** Un kernel no está "hecho" hasta
 que soporta: *crear entidad → trabajar offline → sincronizar → converger →
@@ -300,16 +402,30 @@ reintentar sin duplicar*. Si eso no pasa, es una carpeta de utilidades.
 
 ## 9. Preguntas abiertas
 
-1. ¿Multi-tenant real desde el inicio o single-tenant explícito? (D12 obliga a
-   decidirlo antes de la fase 2).
-2. Inventario de las verticales 2–5: entidades, ¿offline sí/no?, concurrencia,
-   hardware. Una página cada una.
-3. ¿Hay entrega de código a clientes que justifique registry privado en el corto
-   plazo, o basta `workspace:*` + changesets?
-4. ¿La app Android futura consume el mismo protocolo de sync o solo lectura?
-5. ¿Se adopta `kernel-ui` desde el inicio o se pospone hasta la vertical 2?
-6. Nombre definitivo de las verticales de prueba (`vertical-a`/`vertical-b` son
-   placeholders).
+### Resueltas desde la primera versión
+
+| # | Antes | Ahora |
+|---|---|---|
+| 1 | ¿Multi-tenant o single-tenant? | **Multi-tenant**, un despliegue por producto con N tenants (D16). `teacher-service` instancia esto con **tenant = docente** |
+| 2 | Inventario de las verticales | Hecho: 4 productos y su intersección (§1.3, §1.4) |
+| 3 | ¿Registry privado? | Se mantiene `workspace:*` + changesets. Registry solo si un cliente exige repo propio (D2) |
+| 4 | ¿La app Android consume el mismo protocolo? | Sí: el protocolo es documento + JSON Schema (D14). Cualquier cliente puede implementarlo |
+| 5 | ¿`kernel-ui` desde el inicio? | **Pospuesto** hasta que la segunda vertical lo pida |
+| 6 | Nombres de las verticales | `teacher-service`, `store-service`, `tech-service`, `school-service` |
+
+### Siguen abiertas
+
+1. **¿`kernel-config` entra desde el día 1 o se valida con `store-service`?**
+   (D18). Es el candidato más fuerte, pero la regla de §2 dice esperar.
+2. **¿La jerarquía de tenant entra en el kernel desde el día 1?**
+   `teacher-service` no la necesita (escuela = atributo, T2); `school-service`
+   sí (colegio → curso). Decisión pendiente: pagar la jerarquía ahora, barata,
+   o esperar.
+3. **¿`tools/create-vertical` (D3) se implementa o se difiere?**
+   Probablemente diferido hasta la tercera vertical.
+4. **Nombre comercial de cada producto.** `teacher-service` y los demás son
+   nombres internos de repo.
+5. **¿Se adopta `changesets` en la fase 0 o al publicar el primer paquete?**
 
 ---
 
@@ -327,6 +443,58 @@ reintentar sin duplicar*. Si eso no pasa, es una carpeta de utilidades.
 - **Nivel 3** (⚠️ especulativo): estimaciones de esfuerzo por fase; cuánto de la
   lógica de `WorkOrder` es realmente extraíble sin reescritura; el número de
   mappers que saldrán caros.
+
+---
+
+## 11. Repo, workflow y despliegue
+
+### 11.1 El repositorio
+
+- **`lumusitech/app-factory`** — público, rama por defecto `main`.
+- Nace con `docs/` y `.gitignore`. **No hay código todavía.**
+- El commit inicial (`be94fab`) fue directo a `main`: un repo vacío no admite
+  PR. Desde ese commit, **todo cambio pasa por PR**.
+
+### 11.2 Reglas de `main` (aplicadas y verificadas)
+
+| Regla | Efecto |
+|---|---|
+| PR obligatorio | Push directo rechazado: `GH006: Changes must be made through a pull request` |
+| `enforce_admins: true` | **Ni el owner** puede pushear directo |
+| Aprobaciones requeridas: 0 | El owner puede mergear su propio PR (GitHub no permite auto-aprobarse) |
+| Historial lineal | Sin merges enredados |
+| Force-push y borrado | Prohibidos |
+| Resolución de conversaciones | Obligatoria antes de mergear |
+| **Solo squash merge** | Sin merge commit ni rebase. Título y cuerpo salen del PR |
+| Borrar rama al mergear | Activado |
+
+Detalle operativo y convenciones: **`CONTRIBUTING.md`**.
+
+### 11.3 Despliegue
+
+- **Un despliegue por producto**, N tenants adentro (D16).
+- El kernel se comparte **en repo y build, no en runtime**. Cada producto tiene
+  su propio servicio y su propia base de datos.
+- Desplegar un producto **no toca** a otro. Si cambia el kernel, se reconstruyen
+  todos.
+
+### 11.4 Modelo de negocio (estado actual)
+
+- **Gratuito** al inicio, con login social (Google). Sin fricción de alta.
+- Pago mínimo por docente/usuario **más adelante**, como contribución al
+  mantenimiento, no como barrera de entrada.
+- **Validación**: un docente real (el autor del producto), un ciclo lectivo
+  completo, antes de generalizar.
+
+### 11.5 Handoff — cómo arranca un chat nuevo
+
+| Para qué | Qué pegar |
+|---|---|
+| Arquitectura del kernel | Prompt de §0.1 de este documento |
+| Una feature de producto | Prompt de §0.1 de `docs/teacher-service-context.md`, citando `F-xx` |
+
+Regla de trabajo: **un chat por feature o micro-cambio.** El chat cita el
+documento, no la memoria de conversaciones anteriores.
 
 ---
 

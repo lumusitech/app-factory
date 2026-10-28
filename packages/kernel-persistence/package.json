@@ -1,0 +1,37 @@
+{
+  "name": "@kernel/persistence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Adaptador de salida del kernel: driver SQL, unidad de trabajo, outbox, migraciones e idempotencia.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./migrations/*": "./migrations/*"
+  },
+  "files": [
+    "dist",
+    "migrations"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kernel/contracts": "workspace:*",
+    "@kernel/domain": "workspace:*",
+    "@kernel/scope": "workspace:*",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.13",
+    "@types/node": "^26.6.5",
+    "@types/pg": "^8",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

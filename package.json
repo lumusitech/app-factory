@@ -12,7 +12,8 @@
     "boundary:selftest": "node tools/boundary-rules/self-test.mjs",
     "build": "pnpm -r --filter \"./packages/*\" run build",
     "typecheck": "pnpm -r --filter \"./packages/*\" run typecheck",
-    "test": "pnpm -r --filter \"./packages/*\" run test"
+    "test": "pnpm -r --filter \"./packages/*\" run test",
+    "prepare": "pnpm -r --filter \"./packages/*\" run build"
   },
   "devDependencies": {
     "dependency-cruiser": "^18"

@@ -423,9 +423,14 @@ Cuatro secciones, 6–8 páginas. Es el entregable real de la fase de diseño.
    re-ejecución), comportamiento ante fallo del store (fail-open).
 2. **Contrato de sync** — estados `pending`/`blocked`; transiciones
    `2xx→remove`, `401→blocked`, `4xx→blocked`, `5xx/red→conservar y cortar`;
-   FIFO; watchdog; headers de replay. **Incluye la decisión explícita de que no
-   hay merge**: conflicto = `blocked` + resolución humana. Es una decisión, no
-   una carencia.
+   FIFO; watchdog; headers de replay; `QueuedRequest` JSON Schema. **Incluye la
+   decisión explícita de que el kernel no mergea**: ante una escritura obsoleta,
+   detecta el conflicto y la vertical resuelve con una política explícita, nunca
+   en silencio — `blocked` (por defecto: el servidor responde `409` y una persona
+   resuelve) o `lww` (aplica la última escritura y señala que sobrescribió una
+   versión más nueva; la UI advierte). Casos: `teacher-service` = `lww`
+   (mono-escritor), `store-service` = `blocked`. Es una decisión, no una
+   carencia.
 3. **Contrato de alcance** — forma del `ScopeContext`, dónde se puebla, dónde se
    aplica, y la prueba de que es imposible de omitir. Incluye el supuesto
    explícito de **tenant plano** (D25) y que la resolución de alcance vive solo

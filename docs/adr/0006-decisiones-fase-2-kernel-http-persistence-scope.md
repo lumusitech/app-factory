@@ -93,6 +93,9 @@ que aún no está decidido.
    idempotencia** que ADR 0001 asigna a la fase 2 (hash `SHA-256(userId|method|path|key)`,
    TTL 48 h, replay verbatim sin re-ejecución, `409` por concurrencia y por reuso,
    **fail-open** si el store falla, bypass `X-Connectivity-Probe` solo en probe).
+   La concurrencia (§6) se detecta **por proceso**: ADR 0001 descartó un estado
+   `pending` durable, así que dos instancias distintas caen en la ventana
+   *at-most-once* ya documentada por ese ADR.
    **Fuera de la fase 2:** la **detección y la señal de conflicto de sync** y la
    cola/flush, que se difieren a la fase 3 — el *token de versión* es decisión del
    modelo de datos de la vertical (ADR 0002, consecuencias), que disparará su
@@ -139,6 +142,10 @@ que aún no está decidido.
   contratos aparte, no se sigue ensanchando por reflejo.
 - **Se paga** que la detección de conflicto de sync queda **sin implementar**
   hasta la fase 3; queda explícito y no es una carencia silenciosa.
+- **Se paga** que la concurrencia de idempotencia se detecta **por proceso**: con
+  varias instancias, dos requests concurrentes con la misma clave pueden ejecutar
+  ambas y caer en la ventana *at-most-once* de ADR 0001. La alternativa (un
+  `pending` durable) fue descartada por ese ADR y no se re-litiga.
 - **Fuera de alcance:** `kernel-config` (fase 2b; D19), `kernel-client` y
   `kernel-conformance` (fase 3), la cola/flush y el conflicto de sync (fase 3),
   la autenticación y la emisión del token público (contratos aparte), el

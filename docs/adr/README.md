@@ -35,3 +35,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 |---|---|---|
 | [0001](0001-decisiones-contrato-idempotencia.md) | Decisiones del contrato de idempotencia | propuesto |
 | [0002](0002-decisiones-contrato-sync.md) | Decisiones del contrato de sync | propuesto |
+| [0003](0003-decisiones-contrato-alcance.md) | Decisiones del contrato de alcance | propuesto |

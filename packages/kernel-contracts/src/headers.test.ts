@@ -1,12 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
-import { CONNECTIVITY_PROBE_VALUE, HEADERS, isConnectivityProbe } from './headers.js';
+import {
+  CONNECTIVITY_PROBE_VALUE,
+  HEADERS,
+  OFFLINE_REPLAY_VALUE,
+  isConnectivityProbe,
+} from './headers.js';
 
 describe('HEADERS', () => {
   it('usa los nombres normativos del contrato de idempotencia §9', () => {
     expect(HEADERS.idempotencyKey).toBe('Idempotency-Key');
     expect(HEADERS.offlineReplay).toBe('X-Offline-Replay');
     expect(HEADERS.connectivityProbe).toBe('X-Connectivity-Probe');
+  });
+
+  it('agrega el header del token de versión de sync (sync §8.1, ADR 0008)', () => {
+    expect(HEADERS.syncBaseVersion).toBe('X-Sync-Base-Version');
+    expect(OFFLINE_REPLAY_VALUE).toBe('true');
   });
 });
 

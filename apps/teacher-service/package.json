@@ -1,0 +1,27 @@
+{
+  "name": "@app/teacher-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vertical teacher-service del monorepo app-factory.",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kernel/config": "workspace:*",
+    "@kernel/domain": "workspace:*",
+    "@kernel/http": "workspace:*",
+    "@kernel/persistence": "workspace:*",
+    "@kernel/scope": "workspace:*",
+    "fastify": "^5.12.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.13",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

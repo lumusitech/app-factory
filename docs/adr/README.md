@@ -44,3 +44,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 | [0009](0009-materializacion-create-vertical.md) | Materialización de `tools/create-vertical` (fase 4) | propuesto |
 | [0010](0010-token-version-sync-teacher-service.md) | Token de versión de sync y modelo de `Clase` en `teacher-service` | propuesto |
 | [0011](0011-captura-de-clase-f-01.md) | Captura de clase (F-01): asistencia, tema y tarea offline | propuesto |
+| [0012](0012-calificaciones-f-02.md) | Calificaciones numéricas offline (F-02): modelo de `Evaluación` y `Nota` | propuesto |

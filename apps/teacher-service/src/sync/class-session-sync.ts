@@ -10,6 +10,7 @@ import type {
 import type { QueuedRequest } from '@kernel/contracts';
 import type { Clock, IdGenerator } from '@kernel/domain';
 
+import type { AttendanceStatus } from '../domain/class-attendance.js';
 import { classSessionOfflinePolicy } from './offline-policy.js';
 
 /**
@@ -69,6 +70,44 @@ export type ClassSessionTransitionCapture =
       readonly idempotencyKey?: string;
     };
 
+/** Captura de un tema del plan (`POST /courses/:courseId/topics`). */
+export interface TopicCapture {
+  readonly courseId: string;
+  readonly order: number;
+  readonly content: string;
+  /** Id opcional (UUIDv7, D8) para crear y vincular offline en la misma sesión. */
+  readonly id?: string;
+  readonly idempotencyKey?: string;
+}
+
+/** Captura del tema dictado (`PUT /class-sessions/:id/topic`). */
+export interface ClassTopicCapture {
+  readonly classSessionId: string;
+  readonly topicId: string;
+  /** Token opaco de versión vigente (ADR 0011); sin él, no versiona. */
+  readonly baseVersion?: string;
+  readonly idempotencyKey?: string;
+}
+
+/** Captura de la asistencia de la clase (`PUT /class-sessions/:id/attendance`). */
+export interface AttendanceCapture {
+  readonly classSessionId: string;
+  readonly entries: ReadonlyArray<{
+    readonly studentId: string;
+    readonly status: AttendanceStatus;
+  }>;
+  readonly baseVersion?: string;
+  readonly idempotencyKey?: string;
+}
+
+/** Captura de una tarea (`POST /class-sessions/:id/assignments`). */
+export interface AssignmentCapture {
+  readonly classSessionId: string;
+  readonly content: string;
+  readonly topicId?: string;
+  readonly idempotencyKey?: string;
+}
+
 /**
  * Fachada de captura offline: traduce las operaciones de escritura de la clase
  * a items de la cola, poblando `Idempotency-Key` y el token `baseVersion`
@@ -112,6 +151,55 @@ export class ClassSessionSync {
       body,
       idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
       baseVersion: input.baseVersion ?? null,
+    });
+  }
+
+  /** Captura la creación de un tema del plan (`POST /courses/:courseId/topics`). */
+  async captureTopic(input: TopicCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'POST',
+      path: `/courses/${input.courseId}/topics`,
+      body: {
+        order: input.order,
+        content: input.content,
+        ...(input.id === undefined ? {} : { id: input.id }),
+      },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+    });
+  }
+
+  /** Captura el tema dictado de una clase (`PUT /class-sessions/:id/topic`). */
+  async captureClassTopic(input: ClassTopicCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'PUT',
+      path: `${CLASS_SESSION_PATH}/${input.classSessionId}/topic`,
+      body: { topicId: input.topicId },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+      baseVersion: input.baseVersion ?? null,
+    });
+  }
+
+  /** Captura la asistencia de una clase (`PUT /class-sessions/:id/attendance`). */
+  async captureAttendance(input: AttendanceCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'PUT',
+      path: `${CLASS_SESSION_PATH}/${input.classSessionId}/attendance`,
+      body: { entries: input.entries },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+      baseVersion: input.baseVersion ?? null,
+    });
+  }
+
+  /** Captura una tarea de la clase (`POST /class-sessions/:id/assignments`). */
+  async captureAssignment(input: AssignmentCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'POST',
+      path: `${CLASS_SESSION_PATH}/${input.classSessionId}/assignments`,
+      body: {
+        content: input.content,
+        ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
+      },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
     });
   }
 

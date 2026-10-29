@@ -10,4 +10,7 @@ kernel **no** migra tus tablas, ni al revés.
   secuencia es **tuya** y no colisiona con la del kernel (§5).
 - Se aplican con `runAppMigrations` (`src/migrations.ts`).
 
-No hay migraciones todavía: agregá la primera cuando definas tu primera entidad.
+## Migraciones
+
+- `0001-class-session.sql` — tabla `class_session` (agregado `ClassSession`) con
+  sus CHECKs de invariantes y su política de RLS por tenant.

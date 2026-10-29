@@ -178,6 +178,9 @@ importers:
       '@kernel/config':
         specifier: workspace:*
         version: link:../../packages/kernel-config
+      '@kernel/contracts':
+        specifier: workspace:*
+        version: link:../../packages/kernel-contracts
       '@kernel/domain':
         specifier: workspace:*
         version: link:../../packages/kernel-domain
@@ -193,6 +196,12 @@ importers:
       fastify:
         specifier: ^5.12.7
         version: 5.12.7
+      fastify-type-provider-zod:
+        specifier: ^7.0.0
+        version: 7.0.0(@fastify/swagger@9.9.2(supports-color@7.2.0))(fastify@5.12.7)(openapi-types@12.1.3)(zod@4.6.7)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@electric-sql/pglite':
         specifier: ^0.5.13

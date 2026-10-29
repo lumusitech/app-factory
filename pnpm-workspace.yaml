@@ -2,5 +2,7 @@ packages:
   - 'packages/*'
   - 'apps/*'
   - 'tools/*'
+allowBuilds:
+  '@swc/core': true
 minimumReleaseAgeExclude:
   - '@electric-sql/pglite@0.5.13'

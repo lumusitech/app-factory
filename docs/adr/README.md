@@ -40,3 +40,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 | [0005](0005-decisiones-fase-1-kernel-domain-y-contracts.md) | Materialización de `kernel-domain` y `kernel-contracts` | propuesto |
 | [0006](0006-decisiones-fase-2-kernel-http-persistence-scope.md) | Materialización de `kernel-http`, `kernel-persistence` y `kernel-scope` | propuesto |
 | [0007](0007-decisiones-kernel-config.md) | Materialización de `kernel-config` (`@kernel/config`) | propuesto |
+| [0008](0008-materializacion-kernel-client-y-conformance.md) | Materialización de `kernel-client` y `kernel-conformance` | propuesto |

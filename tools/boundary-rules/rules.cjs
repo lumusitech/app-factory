@@ -78,6 +78,25 @@ const boundaryRules = [
     from: { path: '^packages/kernel-config/', pathNot: TEST_FILES },
     to: { path: '^(@kernel/(http|persistence)|packages/kernel-(http|persistence)/)' },
   },
+  {
+    name: 'kernel-client-is-framework-free',
+    severity: 'error',
+    comment: 'D14/D15: kernel-client solo importa módulos locales, core y los puertos del kernel (domain/contracts); cero frameworks (fuera de tests).',
+    from: { path: '^packages/kernel-client/', pathNot: TEST_FILES },
+    to: {
+      dependencyTypesNot: ['local', 'core'],
+      pathNot: '^(@kernel/(domain|contracts)|packages/kernel-(domain|contracts)/)',
+    },
+  },
+  {
+    name: 'kernel-client-no-adapters',
+    severity: 'error',
+    comment: 'D7/§1.2: kernel-client (cliente, parametrizado por puertos) no importa adaptadores (kernel-http, kernel-persistence, kernel-config, kernel-scope).',
+    from: { path: '^packages/kernel-client/', pathNot: TEST_FILES },
+    to: {
+      path: '^(@kernel/(http|persistence|config|scope)|packages/kernel-(http|persistence|config|scope)/)',
+    },
+  },
 ];
 
 module.exports = { boundaryRules };

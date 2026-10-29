@@ -17,6 +17,7 @@ import { registerEvaluationRoutes } from './http/evaluation-routes.js';
 import { registerGradeSheetRoutes } from './http/grade-sheet-routes.js';
 import type { TeacherRepositories } from './http/repositories.js';
 import { registerTopicRoutes } from './http/topic-routes.js';
+import { registerTrajectoryAssessmentRoutes } from './http/trajectory-assessment-routes.js';
 import type { SessionResolver } from './identity.js';
 import { PgAssignmentRepository } from './persistence/assignment-repository.js';
 import { PgClassAttendanceRepository } from './persistence/class-attendance-repository.js';
@@ -25,6 +26,7 @@ import { PgClassTopicRepository } from './persistence/class-topic-repository.js'
 import { PgEvaluationRepository } from './persistence/evaluation-repository.js';
 import { PgGradeSheetRepository } from './persistence/grade-sheet-repository.js';
 import { PgTopicRepository } from './persistence/topic-repository.js';
+import { PgTrajectoryAssessmentRepository } from './persistence/trajectory-assessment-repository.js';
 
 export interface AppDependencies {
   /** Conexión SQL (Postgres en producción; PGlite en tests; D4). */
@@ -40,8 +42,9 @@ export interface AppDependencies {
 /**
  * Composition root manual del borde (D4). Arma `@kernel/http` con el reloj, el
  * resolver de alcance y el store de idempotencia, la unidad de trabajo con los
- * puertos por agregado (F-01: clase, tema, tema dictado, tarea y asistencia) y
- * las rutas de la vertical.
+ * puertos por agregado (F-01: clase, tema, tema dictado, tarea y asistencia;
+ * F-02: evaluación y notas; F-03: valoración preliminar) y las rutas de la
+ * vertical.
  */
 export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> {
   const idGenerator = deps.idGenerator ?? new UuidV7Generator();
@@ -62,6 +65,7 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
     attendances: new PgClassAttendanceRepository(context, new PgOutboxPort(context)),
     evaluations: new PgEvaluationRepository(context, new PgOutboxPort(context)),
     gradeSheets: new PgGradeSheetRepository(context, new PgOutboxPort(context)),
+    trajectoryAssessments: new PgTrajectoryAssessmentRepository(context, new PgOutboxPort(context)),
   }));
 
   registerProbeRoute(app, deps.clock);
@@ -72,6 +76,7 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
   registerClassAttendanceRoutes(app, { uow, clock: deps.clock, idGenerator });
   registerEvaluationRoutes(app, { uow, clock: deps.clock, idGenerator });
   registerGradeSheetRoutes(app, { uow, clock: deps.clock, idGenerator });
+  registerTrajectoryAssessmentRoutes(app, { uow, clock: deps.clock, idGenerator });
 
   return app;
 }

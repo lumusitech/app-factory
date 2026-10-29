@@ -7,6 +7,15 @@ Monorepo del **kernel compartido** entre verticales de producto.
 
 ## Estado
 
+**Fase 4** — `tools/create-vertical`: genera una vertical dentro del monorepo, ya
+cableada al kernel (sync, alcance, configuración y tests). Decisiones en el
+[ADR 0009](docs/adr/0009-materializacion-create-vertical.md).
+
+**Fase 3** — `kernel-client` + `kernel-conformance`: cola offline, caché GET,
+flush con watchdog y la suite de convergencia (*crear → offline → sincronizar →
+converger → reintentar sin duplicar*). Decisiones en el
+[ADR 0008](docs/adr/0008-materializacion-kernel-client-y-conformance.md).
+
 **Fase 2b** — `kernel-config`: configuración por tenant con **esquema versionado**
 y validación (clave-valor, validación inyectada por la vertical). Decisiones en el
 [ADR 0007](docs/adr/0007-decisiones-kernel-config.md).
@@ -37,20 +46,25 @@ app-factory/
 │   ├── kernel-scope/         # ScopeContext + ALS, único seam de alcance
 │   ├── kernel-config/        # configuración por tenant con esquema versionado
 │   ├── kernel-persistence/   # driver SQL, outbox, migraciones e idempotencia
-│   └── kernel-http/          # Fastify + Zod: envelope, errores, alcance, idempotencia
-├── apps/                     # verticales (a crear, fase 5+)
-└── tools/                    # create-vertical (implementado)
+│   ├── kernel-http/          # Fastify + Zod: envelope, errores, alcance, idempotencia
+│   ├── kernel-client/        # cliente offline: cola, caché GET y flush (por puertos)
+│   └── kernel-conformance/   # suite de convergencia (test de aceptación del kernel)
+├── apps/                     # verticales (creadas con create-vertical; fase 5+)
+└── tools/
+    └── create-vertical/      # generador de verticales (implementado, fase 4)
 ```
 
 ## Comandos
 
 ```bash
-pnpm install        # además compila los paquetes (prepare), para el typecheck cruzado
-pnpm typecheck      # tsc --noEmit en cada paquete
-pnpm test           # Vitest (PGlite en memoria: sin contenedor)
-pnpm build          # tsc -p tsconfig.build.json
-pnpm boundary:check # reglas de frontera del kernel (dependency-cruiser)
+pnpm install              # además compila los paquetes (prepare), para el typecheck cruzado
+pnpm typecheck            # tsc --noEmit en cada paquete y vertical
+pnpm test                 # Vitest (PGlite en memoria: sin contenedor)
+pnpm build                # tsc -p tsconfig.build.json
+pnpm boundary:check       # reglas de frontera del kernel (dependency-cruiser)
 pnpm boundary:selftest
+pnpm create-vertical <name>    # genera una vertical en apps/<name> (fase 4)
+pnpm create-vertical:selftest  # self-test del generador
 ```
 
 ## Cómo se trabaja

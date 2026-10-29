@@ -56,3 +56,39 @@ jobs:
 
       - name: Build del kernel
         run: pnpm build
+
+  create-vertical:
+    name: generador de verticales (fase 4)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Self-test del generador (cubre bordes)
+        run: pnpm create-vertical:selftest
+
+      - name: Generar una vertical de prueba
+        run: pnpm create-vertical scratch-vertical
+
+      - name: Instalar con la vertical generada
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Typecheck de la vertical generada
+        run: pnpm --filter @app/scratch-vertical typecheck
+
+      - name: Tests de la vertical generada (deben pasar)
+        run: pnpm --filter @app/scratch-vertical test
+
+      - name: Fronteras sobre la vertical generada
+        run: pnpm boundary:check

@@ -10,9 +10,11 @@
   "scripts": {
     "boundary:check": "depcruise --config tools/boundary-rules/dependency-cruiser.config.cjs .",
     "boundary:selftest": "node tools/boundary-rules/self-test.mjs",
-    "build": "pnpm -r --filter \"./packages/*\" run build",
-    "typecheck": "pnpm -r --filter \"./packages/*\" run typecheck",
-    "test": "pnpm -r --filter \"./packages/*\" run test",
+    "create-vertical": "node tools/create-vertical/index.mjs",
+    "create-vertical:selftest": "node tools/create-vertical/self-test.mjs",
+    "build": "pnpm -r --filter \"./packages/*\" --filter \"./apps/*\" run build",
+    "typecheck": "pnpm -r --filter \"./packages/*\" --filter \"./apps/*\" run typecheck",
+    "test": "pnpm -r --filter \"./packages/*\" --filter \"./apps/*\" run test",
     "prepare": "pnpm -r --filter \"./packages/*\" run build"
   },
   "devDependencies": {

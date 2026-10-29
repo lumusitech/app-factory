@@ -41,3 +41,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 | [0006](0006-decisiones-fase-2-kernel-http-persistence-scope.md) | Materialización de `kernel-http`, `kernel-persistence` y `kernel-scope` | propuesto |
 | [0007](0007-decisiones-kernel-config.md) | Materialización de `kernel-config` (`@kernel/config`) | propuesto |
 | [0008](0008-materializacion-kernel-client-y-conformance.md) | Materialización de `kernel-client` y `kernel-conformance` | propuesto |
+| [0009](0009-materializacion-create-vertical.md) | Materialización de `tools/create-vertical` (fase 4) | propuesto |

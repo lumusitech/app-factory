@@ -16,6 +16,16 @@ export type { IdempotencyKeyInput } from './idempotency/key.js';
 export { sendEnvelope } from './reply.js';
 export { registerProbeRoute } from './routes/probe.js';
 export { registerScope } from './scope-plugin.js';
+export {
+  hasVersionConflict,
+  resolveVersionConflict,
+  syncVersionConflictError,
+} from './sync/version-conflict.js';
+export type {
+  ConflictResolution,
+  ResolveConflictInput,
+  VersionConflictInput,
+} from './sync/version-conflict.js';
 export type { ScopeResolver } from './scope-plugin.js';
 export { buildServer } from './server.js';
 export type { BuildServerOptions, IdempotencySetup } from './server.js';

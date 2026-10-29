@@ -11,10 +11,12 @@ import type { QueuedRequest } from '@kernel/contracts';
 import type { Clock, IdGenerator } from '@kernel/domain';
 
 import type { AttendanceStatus } from '../domain/class-attendance.js';
+import type { TrajectoryRating } from '../domain/trajectory-assessment.js';
 import { classSessionOfflinePolicy } from './offline-policy.js';
 
 /**
- * Captura offline de clase y calificaciones (F-01/F-02) sobre `@kernel/client`
+ * Captura offline de clase, calificaciones y valoración (F-01/F-02/F-03) sobre
+ * `@kernel/client`
  * (`docs/kernel-context.md` §4; `docs/teacher-service-context.md` T10/§8).
  *
  * El cliente es **parametrizado por puertos** y **sin APIs de navegador** (D4,
@@ -127,6 +129,19 @@ export interface GradesCapture {
     readonly value: number;
   }>;
   /** Token opaco de versión vigente (ADR 0012); sin él, no versiona. */
+  readonly baseVersion?: string;
+  readonly idempotencyKey?: string;
+}
+
+/** Captura de la valoración preliminar de un curso/período (F-03). */
+export interface TrajectoryAssessmentCapture {
+  readonly courseId: string;
+  readonly period: string;
+  readonly entries: ReadonlyArray<{
+    readonly studentId: string;
+    readonly rating: TrajectoryRating;
+  }>;
+  /** Token opaco de versión vigente (ADR 0013); sin él, no versiona. */
   readonly baseVersion?: string;
   readonly idempotencyKey?: string;
 }
@@ -246,6 +261,17 @@ export class ClassSessionSync {
     return this.#client.enqueue({
       method: 'PUT',
       path: `/evaluations/${input.evaluationId}/grades`,
+      body: { entries: input.entries },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+      baseVersion: input.baseVersion ?? null,
+    });
+  }
+
+  /** Captura la valoración preliminar de un curso/período (`PUT /courses/:courseId/trajectory-assessments/:period`). */
+  async captureTrajectoryAssessment(input: TrajectoryAssessmentCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'PUT',
+      path: `/courses/${input.courseId}/trajectory-assessments/${input.period}`,
       body: { entries: input.entries },
       idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
       baseVersion: input.baseVersion ?? null,

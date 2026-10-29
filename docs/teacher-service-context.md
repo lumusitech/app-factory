@@ -244,10 +244,17 @@ Docente (tenant)
 
 Alumno (legajo interno; DNI opcional)
  └─ Matrícula (año, curso, materia, estado)
-     ├─ Valoración     (período, tipo: preliminar TEA/TEP/TED | final numérica)
+     ├─ Valoración     (período, tipo: preliminar TEA/TEP/TED)
      ├─ Intensificación (ventana, resultado, motivo)
      └─ Registro       (fecha, tipo, detalle)   ← conducta, lectoescritura, derivación
 ```
+
+**Reconciliación de la valoración (ADR 0013).** La `Valoración` de este árbol es la
+**preliminar cualitativa** (`TEA`/`TEP`/`TED`, mitad de cuatrimestre; T17/§13.1). La
+**valoración numérica final** (cierre de cuatrimestre) ya vive como `Nota` bajo
+`Evaluación` (F-02, ADR 0012), no como una rama de `Valoración`. La captura de la
+preliminar es un **acto por `(curso, período)`** (hoja batch, §1.3), aunque la
+`Valoración` se conciba por `Matrícula` una vez que F-06 la modele.
 
 ### 3.2 Reglas de negocio
 
@@ -287,7 +294,7 @@ cronograma, de la planificación por fechas y de los avisos.
 - `Asistencia`: `presente` · `ausente` · `tarde` · `justificada` · `retirado`
 - `Matrícula`: `cursando` · `intensificando` · `adeudada` · `aprobada` · `libre`
 - `Intensificación`: `pendiente` · `en_curso` · `aprobada` · `no_aprobada`
-- `Valoración`: `TEA` · `TEP` · `TED` (preliminar) · numérica 1–10 (final)
+- `Valoración`: `TEA` · `TEP` · `TED` (preliminar) — la numérica 1–10 (final) es la `Nota` de `Evaluación` (F-02)
 
 Los motivos de cancelación son datos, no un enum cerrado: paro, desinfección,
 falta de agua, falta de luz, baños, jornada institucional, otro.

@@ -2,11 +2,14 @@ import type { AssignmentRepository } from '../domain/assignment-repository.js';
 import type { ClassAttendanceRepository } from '../domain/class-attendance-repository.js';
 import type { ClassSessionRepository } from '../domain/class-session-repository.js';
 import type { ClassTopicRepository } from '../domain/class-topic-repository.js';
+import type { EvaluationRepository } from '../domain/evaluation-repository.js';
+import type { GradeSheetRepository } from '../domain/grade-sheet-repository.js';
 import type { TopicRepository } from '../domain/topic-repository.js';
 
 /**
  * Bag de repositorios por agregado (D6) que el borde consume dentro de la unidad
- * de trabajo (F-01; ADR 0011). Un puerto por agregado, nunca `Repository<T>`.
+ * de trabajo (F-01/F-02; ADR 0011/0012). Un puerto por agregado, nunca
+ * `Repository<T>`.
  */
 export interface TeacherRepositories {
   readonly classes: ClassSessionRepository;
@@ -14,4 +17,6 @@ export interface TeacherRepositories {
   readonly classTopics: ClassTopicRepository;
   readonly assignments: AssignmentRepository;
   readonly attendances: ClassAttendanceRepository;
+  readonly evaluations: EvaluationRepository;
+  readonly gradeSheets: GradeSheetRepository;
 }

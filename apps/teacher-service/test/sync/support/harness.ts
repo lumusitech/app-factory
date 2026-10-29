@@ -112,6 +112,8 @@ export interface TeacherSyncHarness {
   readonly transport: ToggleTransport;
   countSessions(): Promise<number>;
   countOutbox(): Promise<number>;
+  countEvaluations(): Promise<number>;
+  countGrades(): Promise<number>;
   sessionRow(id: string): Promise<SessionRow | null>;
   close(): Promise<void>;
 }
@@ -149,6 +151,15 @@ export async function createTeacherSyncHarness(): Promise<TeacherSyncHarness> {
     throw new HttpError('UNAUTHORIZED', 'Sesión inválida.', 401);
   });
   app.put('/class-sessions/boom/attendance', async () => {
+    throw new Error('fallo interno simulado');
+  });
+  app.post('/courses/expired-session/evaluations', async () => {
+    throw new HttpError('UNAUTHORIZED', 'Sesión inválida.', 401);
+  });
+  app.put('/evaluations/expired-session/grades', async () => {
+    throw new HttpError('UNAUTHORIZED', 'Sesión inválida.', 401);
+  });
+  app.put('/evaluations/boom/grades', async () => {
     throw new Error('fallo interno simulado');
   });
 
@@ -190,6 +201,18 @@ export async function createTeacherSyncHarness(): Promise<TeacherSyncHarness> {
     async countOutbox(): Promise<number> {
       const { rows } = await db.query<{ count: number }>(
         'SELECT count(*)::int AS count FROM outbox',
+      );
+      return rows[0]?.count ?? -1;
+    },
+    async countEvaluations(): Promise<number> {
+      const { rows } = await db.query<{ count: number }>(
+        'SELECT count(*)::int AS count FROM evaluation',
+      );
+      return rows[0]?.count ?? -1;
+    },
+    async countGrades(): Promise<number> {
+      const { rows } = await db.query<{ count: number }>(
+        'SELECT count(*)::int AS count FROM grade_entry',
       );
       return rows[0]?.count ?? -1;
     },

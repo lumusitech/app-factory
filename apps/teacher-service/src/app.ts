@@ -13,6 +13,8 @@ import { registerAssignmentRoutes } from './http/assignment-routes.js';
 import { registerClassAttendanceRoutes } from './http/class-attendance-routes.js';
 import { registerClassSessionRoutes } from './http/class-session-routes.js';
 import { registerClassTopicRoutes } from './http/class-topic-routes.js';
+import { registerEvaluationRoutes } from './http/evaluation-routes.js';
+import { registerGradeSheetRoutes } from './http/grade-sheet-routes.js';
 import type { TeacherRepositories } from './http/repositories.js';
 import { registerTopicRoutes } from './http/topic-routes.js';
 import type { SessionResolver } from './identity.js';
@@ -20,6 +22,8 @@ import { PgAssignmentRepository } from './persistence/assignment-repository.js';
 import { PgClassAttendanceRepository } from './persistence/class-attendance-repository.js';
 import { PgClassSessionRepository } from './persistence/class-session-repository.js';
 import { PgClassTopicRepository } from './persistence/class-topic-repository.js';
+import { PgEvaluationRepository } from './persistence/evaluation-repository.js';
+import { PgGradeSheetRepository } from './persistence/grade-sheet-repository.js';
 import { PgTopicRepository } from './persistence/topic-repository.js';
 
 export interface AppDependencies {
@@ -56,6 +60,8 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
     classTopics: new PgClassTopicRepository(context, new PgOutboxPort(context)),
     assignments: new PgAssignmentRepository(context, new PgOutboxPort(context)),
     attendances: new PgClassAttendanceRepository(context, new PgOutboxPort(context)),
+    evaluations: new PgEvaluationRepository(context, new PgOutboxPort(context)),
+    gradeSheets: new PgGradeSheetRepository(context, new PgOutboxPort(context)),
   }));
 
   registerProbeRoute(app, deps.clock);
@@ -64,6 +70,8 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
   registerClassTopicRoutes(app, { uow, clock: deps.clock, idGenerator });
   registerAssignmentRoutes(app, { uow, clock: deps.clock, idGenerator });
   registerClassAttendanceRoutes(app, { uow, clock: deps.clock, idGenerator });
+  registerEvaluationRoutes(app, { uow, clock: deps.clock, idGenerator });
+  registerGradeSheetRoutes(app, { uow, clock: deps.clock, idGenerator });
 
   return app;
 }

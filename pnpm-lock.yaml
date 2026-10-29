@@ -175,6 +175,9 @@ importers:
 
   apps/teacher-service:
     dependencies:
+      '@kernel/client':
+        specifier: workspace:*
+        version: link:../../packages/kernel-client
       '@kernel/config':
         specifier: workspace:*
         version: link:../../packages/kernel-config

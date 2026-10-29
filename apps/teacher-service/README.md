@@ -4,9 +4,10 @@ Vertical del monorepo `app-factory`, generada por `tools/create-vertical` (fase 
 de [`docs/kernel-context.md`](../../docs/kernel-context.md) §7). Nace **cableada
 al kernel** y luego gana dominio con tests primero (D22, T25).
 
-Estado: **fase 5, Slice A** — el corte de servidor de F-01: una entidad de
-dominio (`ClassSession`), su persistencia y su alcance. La captura offline y la
-convergencia son el Slice B.
+Estado: **fase 5, Slice B** — sobre el corte de servidor de F-01 (entidad
+`ClassSession`, persistencia y alcance), la **captura offline** con
+`@kernel/client` y la **convergencia** end-to-end (crear → offline → sincronizar
+→ converger → reintentar sin duplicar).
 
 ## Qué trae cableado
 
@@ -22,6 +23,12 @@ convergencia son el Slice B.
   transacción, D9/D10).
 - **Rutas** (`src/http/class-session-routes.ts`): `POST` / `GET` / `PATCH` bajo la
   política `lww` (sync §8.3, T10) con el header `X-Sync-Base-Version`.
+- **Captura offline** (`src/sync/`): el composition root del cliente
+  (`createClassSessionSync`) cablea `@kernel/client` con la **política offline**
+  de la vertical (encolables `POST /class-sessions` y `PATCH /class-sessions/:id`)
+  y su endpoint de probe; `ClassSessionSync` traduce crear/transicionar a items
+  de la cola, poblando `Idempotency-Key` y el token `baseVersion` (ADR 0010). El
+  cliente es **parametrizado por puertos** y sin navegador (D4, ADR 0008).
 - **Alcance** (`src/identity.ts`): un `SessionResolver` **placeholder**. La
   autenticación real (login de Google, T22) y el token público (T9) son contratos
   aparte; reemplazá el stub antes de producción.
@@ -33,16 +40,19 @@ convergencia son el Slice B.
   **único dueño** de tu esquema
   ([`docs/contracts/evolution.md`](../../docs/contracts/evolution.md) §3).
 - **Tests**: smoke del cableado (`test/app.test.ts`), invariantes de dominio
-  (`test/domain/`), mapper (`test/persistence/`) y borde HTTP
-  (`test/class-session-api.test.ts`) — bordes y rutas críticas, no solo el camino
-  feliz (D22, T25).
+  (`test/domain/`), mapper (`test/persistence/`), borde HTTP
+  (`test/class-session-api.test.ts`) y **convergencia offline**
+  (`test/sync/`: aceptación §7 + tabla de conformidad de sync §10 con red,
+  watchdog, `5xx`, `401`/`4xx`, FIFO, head-of-line y conflicto `lww`) — bordes y
+  rutas críticas, no solo el camino feliz (D22, T25).
 
 ## Qué NO trae (a propósito)
 
-- **Sin UI**: `kernel-ui` (mobile-first, PWA, Tailwind v4) y el cliente offline
-  (`kernel-client`) se cablean cuando exista la pantalla que los consuma — nada
-  entra sin consumidor real (ODD #1).
-- **Sin captura offline ni convergencia**: es el Slice B de la fase 5.
+- **Sin UI**: `kernel-ui` (mobile-first, PWA, Tailwind v4) llega cuando exista la
+  pantalla que la consuma — nada entra sin consumidor real (ODD #1). El cliente
+  offline ya está cableado en `src/sync/`, pero el **adaptador IndexedDB** y la
+  pantalla que lo usa se difieren (ADR 0008 §2); en tests los adaptadores son en
+  memoria.
 - **Sin `Curso`**: `ClassSession` referencia su curso con un `courseId` opaco
   hasta que se modele (ADR 0010).
 

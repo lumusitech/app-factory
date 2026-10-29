@@ -33,3 +33,15 @@ export type {
 export { PgClassSessionRepository } from './persistence/class-session-repository.js';
 export { rowToSnapshot, snapshotToParams } from './persistence/class-session-row.js';
 export type { ClassSessionRow } from './persistence/class-session-row.js';
+
+export { classSessionOfflinePolicy } from './sync/offline-policy.js';
+export {
+  CLASS_SESSION_PROBE_SPEC,
+  ClassSessionSync,
+  createClassSessionSync,
+} from './sync/class-session-sync.js';
+export type {
+  ClassSessionCreateCapture,
+  ClassSessionSyncPorts,
+  ClassSessionTransitionCapture,
+} from './sync/class-session-sync.js';

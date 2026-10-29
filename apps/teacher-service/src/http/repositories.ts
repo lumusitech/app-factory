@@ -1,0 +1,17 @@
+import type { AssignmentRepository } from '../domain/assignment-repository.js';
+import type { ClassAttendanceRepository } from '../domain/class-attendance-repository.js';
+import type { ClassSessionRepository } from '../domain/class-session-repository.js';
+import type { ClassTopicRepository } from '../domain/class-topic-repository.js';
+import type { TopicRepository } from '../domain/topic-repository.js';
+
+/**
+ * Bag de repositorios por agregado (D6) que el borde consume dentro de la unidad
+ * de trabajo (F-01; ADR 0011). Un puerto por agregado, nunca `Repository<T>`.
+ */
+export interface TeacherRepositories {
+  readonly classes: ClassSessionRepository;
+  readonly topics: TopicRepository;
+  readonly classTopics: ClassTopicRepository;
+  readonly assignments: AssignmentRepository;
+  readonly attendances: ClassAttendanceRepository;
+}

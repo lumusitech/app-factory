@@ -145,6 +145,12 @@ export async function createTeacherSyncHarness(): Promise<TeacherSyncHarness> {
   app.patch('/class-sessions/boom', async () => {
     throw new Error('fallo interno simulado');
   });
+  app.put('/class-sessions/expired-session/attendance', async () => {
+    throw new HttpError('UNAUTHORIZED', 'Sesión inválida.', 401);
+  });
+  app.put('/class-sessions/boom/attendance', async () => {
+    throw new Error('fallo interno simulado');
+  });
 
   const injectTransport = new InjectTransport(app, {
     'x-tenant': TENANT,

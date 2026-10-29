@@ -52,7 +52,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Tests (bloquean el merge si fallan, CONTRIBUTING §8.4)
-        run: pnpm test
+        run: pnpm test:ci
 
       - name: Build del kernel
         run: pnpm build

@@ -1,14 +1,14 @@
-import { HEADERS } from '@kernel/contracts';
 import type { OverwriteSignal } from '@kernel/contracts';
 import type { Clock, IdGenerator, UnitOfWork } from '@kernel/domain';
 import { NotFoundError, resolveVersionConflict, sendEnvelope } from '@kernel/http';
 import { requireScope } from '@kernel/scope';
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import { CLASS_STATUSES, ClassSession, isValidCalendarDate } from '../domain/class-session.js';
-import type { ClassSessionRepository } from '../domain/class-session-repository.js';
+import type { TeacherRepositories } from './repositories.js';
+import { deviceLabel, readBaseVersion } from './sync-headers.js';
 
 /**
  * Rutas de `ClassSession` (F-01, corte de servidor; ADR 0010).
@@ -18,12 +18,8 @@ import type { ClassSessionRepository } from '../domain/class-session-repository.
  * de sobrescritura; nunca es silenciosa (sync §8.2).
  */
 
-export interface ClassSessionRepositories {
-  readonly classes: ClassSessionRepository;
-}
-
 export interface ClassSessionRoutesDeps {
-  readonly uow: UnitOfWork<ClassSessionRepositories>;
+  readonly uow: UnitOfWork<TeacherRepositories>;
   readonly clock: Clock;
   readonly idGenerator: IdGenerator;
 }
@@ -86,20 +82,6 @@ function toResponseData(snapshot: ReturnType<ClassSession['snapshot']>): z.infer
     cancellationReason: snapshot.cancellationReason,
     version: snapshot.version,
   };
-}
-
-/** Lee el token de versión del header (`X-Sync-Base-Version`), o `null`. */
-function readBaseVersion(request: FastifyRequest): string | null {
-  const raw = request.headers[HEADERS.syncBaseVersion.toLowerCase()];
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return typeof value === 'string' && value !== '' ? value : null;
-}
-
-/** Etiqueta legible de dispositivo, **derivada por el servidor** (sync §8.2). */
-function deviceLabel(request: FastifyRequest): string {
-  const raw = request.headers['user-agent'];
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return typeof value === 'string' && value !== '' ? value.slice(0, 120) : 'desconocido';
 }
 
 function applyTransition(

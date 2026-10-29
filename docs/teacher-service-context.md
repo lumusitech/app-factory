@@ -235,7 +235,9 @@ Docente (tenant)
      ├─ Calendario     (períodos, ventanas de intensificación, feriados, cierres)
      └─ Curso          (materia, división, año, horario, ciclo lectivo)
          ├─ Clase      (fecha, estado, motivo de cancelación)
-         │   └─ Asistencia (alumno, estado)
+         │   ├─ Tema dictado (vínculo al Tema del plan que se dictó)
+         │   ├─ Asistencia   (alumno, estado)
+         │   └─ Tarea         (contenido; tema opcional)
          ├─ Tema       (orden en el plan, contenido)
          └─ Evaluación (nombre, período, peso)
              └─ Nota   (alumno, valor)
@@ -282,6 +284,7 @@ cronograma, de la planificación por fechas y de los avisos.
 ### 3.4 Estados
 
 - `Clase`: `dictada` · `cancelada(motivo)` · `feriado` · `sin_clase`
+- `Asistencia`: `presente` · `ausente` · `tarde` · `justificada` · `retirado`
 - `Matrícula`: `cursando` · `intensificando` · `adeudada` · `aprobada` · `libre`
 - `Intensificación`: `pendiente` · `en_curso` · `aprobada` · `no_aprobada`
 - `Valoración`: `TEA` · `TEP` · `TED` (preliminar) · numérica 1–10 (final)

@@ -76,3 +76,12 @@ test('la fixture `clean` no hace fallar al gate (no sobre-dispara)', () => {
 
   assert.deepEqual(violatedRules('clean'), []);
 });
+
+test('el gate escanea TypeScript (.ts), no solo .js/.mjs', () => {
+  // La fixture `ts-violation` viola la misma regla que `violation`, pero en
+  // `.ts`. Si el gate no escaneara TS, tendría 0 violaciones y este test fallaría.
+  const gate = depcruise('ts-violation', 'err');
+  assert.notEqual(gate.status, 0, 'el gate debió fallar sobre la fixture `ts-violation`');
+
+  assert.deepEqual(violatedRules('ts-violation'), ['kernel-domain-is-framework-free']);
+});

@@ -18,6 +18,7 @@
     "prepare": "pnpm -r --filter \"./packages/*\" run build"
   },
   "devDependencies": {
+    "@swc/core": "^1.16.20",
     "dependency-cruiser": "^18"
   }
 }

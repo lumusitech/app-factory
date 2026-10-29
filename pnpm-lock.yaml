@@ -170,6 +170,25 @@ importers:
         specifier: ^18
         version: 18.7.0
 
+  packages/kernel-client:
+    dependencies:
+      '@kernel/contracts':
+        specifier: workspace:*
+        version: link:../kernel-contracts
+      '@kernel/domain':
+        specifier: workspace:*
+        version: link:../kernel-domain
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.5
+        version: 26.6.5
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@26.6.5)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
+
   packages/kernel-config:
     dependencies:
       '@kernel/domain':
@@ -188,6 +207,51 @@ importers:
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
+
+  packages/kernel-conformance:
+    devDependencies:
+      '@electric-sql/pglite':
+        specifier: ^0.5.13
+        version: 0.5.13
+      '@kernel/client':
+        specifier: workspace:*
+        version: link:../kernel-client
+      '@kernel/contracts':
+        specifier: workspace:*
+        version: link:../kernel-contracts
+      '@kernel/domain':
+        specifier: workspace:*
+        version: link:../kernel-domain
+      '@kernel/http':
+        specifier: workspace:*
+        version: link:../kernel-http
+      '@kernel/persistence':
+        specifier: workspace:*
+        version: link:../kernel-persistence
+      '@kernel/scope':
+        specifier: workspace:*
+        version: link:../kernel-scope
+      '@types/node':
+        specifier: ^26.6.5
+        version: 26.6.5
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
+      fastify:
+        specifier: ^5.12.7
+        version: 5.12.7
+      fastify-type-provider-zod:
+        specifier: ^7.0.0
+        version: 7.0.0(@fastify/swagger@9.9.2(supports-color@7.2.0))(fastify@5.12.7)(openapi-types@12.1.3)(zod@4.6.7)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@26.6.5)(vite@8.3.5(@types/node@26.6.5)(yaml@2.9.1))
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   packages/kernel-contracts:
     devDependencies:
@@ -1252,7 +1316,7 @@ snapshots:
   '@fastify/ajv-compiler@4.0.7':
     dependencies:
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       fast-uri: 4.2.3
 
   '@fastify/deepmerge@3.2.4': {}
@@ -1452,8 +1516,8 @@ snapshots:
 
   acorn@8.19.0: {}
 
-  ajv-formats@3.0.1:
-    dependencies:
+  ajv-formats@3.0.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
   ajv@8.20.0:
@@ -1547,7 +1611,7 @@ snapshots:
     dependencies:
       '@fastify/merge-json-schemas': 0.2.2
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       fast-uri: 4.2.3
       json-schema-ref-resolver: 3.0.1
       rfdc: 1.4.1

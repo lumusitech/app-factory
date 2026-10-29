@@ -14,8 +14,8 @@ import type { AttendanceStatus } from '../domain/class-attendance.js';
 import { classSessionOfflinePolicy } from './offline-policy.js';
 
 /**
- * Captura offline de clase (F-01) sobre `@kernel/client` (`docs/kernel-context.md`
- * §4; `docs/teacher-service-context.md` T10/§8).
+ * Captura offline de clase y calificaciones (F-01/F-02) sobre `@kernel/client`
+ * (`docs/kernel-context.md` §4; `docs/teacher-service-context.md` T10/§8).
  *
  * El cliente es **parametrizado por puertos** y **sin APIs de navegador** (D4,
  * ADR 0008). Los adaptadores concretos —memoria en test; el de IndexedDB está
@@ -108,11 +108,34 @@ export interface AssignmentCapture {
   readonly idempotencyKey?: string;
 }
 
+/** Captura de una evaluación del curso (`POST /courses/:courseId/evaluations`; F-02). */
+export interface EvaluationCapture {
+  readonly courseId: string;
+  readonly name: string;
+  readonly period: string;
+  readonly weight: number;
+  /** Id opcional (UUIDv7, D8) para crear la evaluación y calificar offline en la misma sesión. */
+  readonly id?: string;
+  readonly idempotencyKey?: string;
+}
+
+/** Captura de las notas de una evaluación (`PUT /evaluations/:id/grades`; F-02). */
+export interface GradesCapture {
+  readonly evaluationId: string;
+  readonly entries: ReadonlyArray<{
+    readonly studentId: string;
+    readonly value: number;
+  }>;
+  /** Token opaco de versión vigente (ADR 0012); sin él, no versiona. */
+  readonly baseVersion?: string;
+  readonly idempotencyKey?: string;
+}
+
 /**
- * Fachada de captura offline: traduce las operaciones de escritura de la clase
- * a items de la cola, poblando `Idempotency-Key` y el token `baseVersion`
- * (`String(version)`, ADR 0010). El kernel hace el resto (flush FIFO, watchdog,
- * conflicto `lww`, replay idempotente).
+ * Fachada de captura offline: traduce las operaciones de escritura (clase,
+ * evaluación, notas) a items de la cola, poblando `Idempotency-Key` y el token
+ * `baseVersion` (`String(version)`, ADR 0010/0012). El kernel hace el resto
+ * (flush FIFO, watchdog, conflicto `lww`, replay idempotente).
  */
 export class ClassSessionSync {
   readonly #client: SyncClient;
@@ -200,6 +223,32 @@ export class ClassSessionSync {
         ...(input.topicId === undefined ? {} : { topicId: input.topicId }),
       },
       idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+    });
+  }
+
+  /** Captura la creación de una evaluación (`POST /courses/:courseId/evaluations`). */
+  async captureEvaluation(input: EvaluationCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'POST',
+      path: `/courses/${input.courseId}/evaluations`,
+      body: {
+        name: input.name,
+        period: input.period,
+        weight: input.weight,
+        ...(input.id === undefined ? {} : { id: input.id }),
+      },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+    });
+  }
+
+  /** Captura las notas de una evaluación (`PUT /evaluations/:id/grades`). */
+  async captureGrades(input: GradesCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'PUT',
+      path: `/evaluations/${input.evaluationId}/grades`,
+      body: { entries: input.entries },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+      baseVersion: input.baseVersion ?? null,
     });
   }
 

@@ -114,6 +114,8 @@ export interface TeacherSyncHarness {
   countOutbox(): Promise<number>;
   countEvaluations(): Promise<number>;
   countGrades(): Promise<number>;
+  countTrajectoryAssessments(): Promise<number>;
+  countTrajectoryEntries(): Promise<number>;
   sessionRow(id: string): Promise<SessionRow | null>;
   close(): Promise<void>;
 }
@@ -160,6 +162,12 @@ export async function createTeacherSyncHarness(): Promise<TeacherSyncHarness> {
     throw new HttpError('UNAUTHORIZED', 'Sesión inválida.', 401);
   });
   app.put('/evaluations/boom/grades', async () => {
+    throw new Error('fallo interno simulado');
+  });
+  app.put('/courses/expired-session/trajectory-assessments/:period', async () => {
+    throw new HttpError('UNAUTHORIZED', 'Sesión inválida.', 401);
+  });
+  app.put('/courses/boom/trajectory-assessments/:period', async () => {
     throw new Error('fallo interno simulado');
   });
 
@@ -213,6 +221,18 @@ export async function createTeacherSyncHarness(): Promise<TeacherSyncHarness> {
     async countGrades(): Promise<number> {
       const { rows } = await db.query<{ count: number }>(
         'SELECT count(*)::int AS count FROM grade_entry',
+      );
+      return rows[0]?.count ?? -1;
+    },
+    async countTrajectoryAssessments(): Promise<number> {
+      const { rows } = await db.query<{ count: number }>(
+        'SELECT count(*)::int AS count FROM trajectory_assessment',
+      );
+      return rows[0]?.count ?? -1;
+    },
+    async countTrajectoryEntries(): Promise<number> {
+      const { rows } = await db.query<{ count: number }>(
+        'SELECT count(*)::int AS count FROM trajectory_assessment_entry',
       );
       return rows[0]?.count ?? -1;
     },

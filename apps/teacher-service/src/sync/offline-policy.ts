@@ -2,7 +2,7 @@ import type { OfflinePolicy } from '@kernel/client';
 import type { QueuedRequestMethod } from '@kernel/contracts';
 
 /**
- * Política offline de `teacher-service` (F-01/F-02): qué mutaciones de captura
+ * Política offline de `teacher-service` (F-01/F-02/F-03): qué mutaciones de captura
  * son encolables (`docs/contracts/sync.md` §1). El núcleo del cliente no conoce
  * estas rutas (§1.2): las inyecta la vertical.
  *
@@ -13,7 +13,9 @@ import type { QueuedRequestMethod } from '@kernel/contracts';
  * - `PUT /class-sessions/:id/attendance` (asistencia de la clase);
  * - `POST /class-sessions/:id/assignments` (crear tarea);
  * - `POST /courses/:courseId/evaluations` (crear evaluación; F-02);
- * - `PUT /evaluations/:id/grades` (cargar notas de la evaluación; F-02).
+ * - `PUT /evaluations/:id/grades` (cargar notas de la evaluación; F-02);
+ * - `PUT /courses/:courseId/trajectory-assessments/:period` (valoración
+ *   preliminar TEA/TEP/TED; F-03).
  *
  * El resto —lecturas y el probe— nunca se encola.
  */
@@ -26,6 +28,7 @@ const CLASS_SESSION_ATTENDANCE = /^\/class-sessions\/[^/]+\/attendance$/;
 const CLASS_SESSION_ASSIGNMENTS = /^\/class-sessions\/[^/]+\/assignments$/;
 const COURSE_EVALUATIONS = /^\/courses\/[^/]+\/evaluations$/;
 const EVALUATION_GRADES = /^\/evaluations\/[^/]+\/grades$/;
+const COURSE_TRAJECTORY_ASSESSMENTS = /^\/courses\/[^/]+\/trajectory-assessments\/[^/]+$/;
 
 export const classSessionOfflinePolicy: OfflinePolicy = {
   isQueueable(method: QueuedRequestMethod, path: string): boolean {
@@ -44,7 +47,8 @@ export const classSessionOfflinePolicy: OfflinePolicy = {
       return (
         CLASS_SESSION_TOPIC.test(path) ||
         CLASS_SESSION_ATTENDANCE.test(path) ||
-        EVALUATION_GRADES.test(path)
+        EVALUATION_GRADES.test(path) ||
+        COURSE_TRAJECTORY_ASSESSMENTS.test(path)
       );
     }
     return false;

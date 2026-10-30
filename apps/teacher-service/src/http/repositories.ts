@@ -6,9 +6,11 @@ import type { ClassSessionRepository } from '../domain/class-session-repository.
 import type { ClassTopicRepository } from '../domain/class-topic-repository.js';
 import type { EvaluationRepository } from '../domain/evaluation-repository.js';
 import type { GradeSheetRepository } from '../domain/grade-sheet-repository.js';
+import type { PeriodClosingRepository } from '../domain/period-closing-repository.js';
 import type { TopicRepository } from '../domain/topic-repository.js';
 import type { TrajectoryAssessmentRepository } from '../domain/trajectory-assessment-repository.js';
 import type { OfficialSheetReadModel } from '../persistence/official-sheet-read-model.js';
+import type { PeriodClosingReadModel } from '../persistence/period-closing-read-model.js';
 import type { StudentRecordRepository } from '../domain/student-record-repository.js';
 
 /**
@@ -32,4 +34,6 @@ export interface TeacherRepositories {
   readonly officialSheet: OfficialSheetReadModel;
   readonly config: ConfigEntryRepository;
   readonly studentRecords: StudentRecordRepository;
+  readonly periodClosings: PeriodClosingRepository;
+  readonly periodClosingView: PeriodClosingReadModel;
 }

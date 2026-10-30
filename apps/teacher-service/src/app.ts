@@ -23,11 +23,13 @@ import type { TeacherRepositories } from './http/repositories.js';
 import { registerStudentRecordRoutes } from './http/student-record-routes.js';
 import { registerTopicRoutes } from './http/topic-routes.js';
 import { registerTrajectoryAssessmentRoutes } from './http/trajectory-assessment-routes.js';
+import { registerWorksheetRoutes } from './http/worksheet-routes.js';
 import type { SessionResolver } from './identity.js';
 import { PgAssignmentRepository } from './persistence/assignment-repository.js';
 import { PgClassAttendanceRepository } from './persistence/class-attendance-repository.js';
 import { PgClassSessionRepository } from './persistence/class-session-repository.js';
 import { PgClassTopicRepository } from './persistence/class-topic-repository.js';
+import { PgDailyWorksheetReadModel } from './persistence/daily-worksheet-read-model.js';
 import { PgEvaluationRepository } from './persistence/evaluation-repository.js';
 import { PgGradeSheetRepository } from './persistence/grade-sheet-repository.js';
 import { PgOfficialSheetReadModel } from './persistence/official-sheet-read-model.js';
@@ -80,6 +82,7 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
     studentRecords: new PgStudentRecordRepository(context, new PgOutboxPort(context)),
     periodClosings: new PgPeriodClosingRepository(context, new PgOutboxPort(context)),
     periodClosingView: new PgPeriodClosingReadModel(context),
+    dailyWorksheet: new PgDailyWorksheetReadModel(context),
   }));
 
   registerProbeRoute(app, deps.clock);
@@ -99,6 +102,12 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
   });
   registerStudentRecordRoutes(app, { uow, clock: deps.clock, idGenerator });
   registerPeriodClosingRoutes(app, { uow, clock: deps.clock, idGenerator });
+  registerWorksheetRoutes(app, {
+    uow,
+    clock: deps.clock,
+    idGenerator,
+    configRegistry: createConfigRegistry(),
+  });
 
   return app;
 }

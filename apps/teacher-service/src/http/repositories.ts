@@ -11,6 +11,7 @@ import type { TopicRepository } from '../domain/topic-repository.js';
 import type { TrajectoryAssessmentRepository } from '../domain/trajectory-assessment-repository.js';
 import type { OfficialSheetReadModel } from '../persistence/official-sheet-read-model.js';
 import type { PeriodClosingReadModel } from '../persistence/period-closing-read-model.js';
+import type { DailyWorksheetReadModel } from '../persistence/daily-worksheet-read-model.js';
 import type { StudentRecordRepository } from '../domain/student-record-repository.js';
 
 /**
@@ -21,6 +22,10 @@ import type { StudentRecordRepository } from '../domain/student-record-repositor
  * F-04 (ADR 0014) suma dos entradas que **no** son agregados de la planilla
  * (vista derivada, T6): el **read model** de la planilla (lectura cross-agregado)
  * y el repositorio de **configuración** del tenant (D19/ADR 0007; la plantilla).
+ *
+ * La planilla de uso diario (ADR 0017) suma su propio **read model** cross-agregado
+ * (asistencia por fecha + actividades + valoración + cierre + evolución); sigue
+ * siendo una vista derivada (T6), no un agregado.
  */
 export interface TeacherRepositories {
   readonly classes: ClassSessionRepository;
@@ -36,4 +41,5 @@ export interface TeacherRepositories {
   readonly studentRecords: StudentRecordRepository;
   readonly periodClosings: PeriodClosingRepository;
   readonly periodClosingView: PeriodClosingReadModel;
+  readonly dailyWorksheet: DailyWorksheetReadModel;
 }

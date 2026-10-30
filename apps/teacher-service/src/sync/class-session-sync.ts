@@ -160,6 +160,20 @@ export interface StudentRecordCapture {
   readonly idempotencyKey?: string;
 }
 
+/** Captura del cierre de período (`PUT /courses/:courseId/period-closings/:period`; F-12). */
+export interface PeriodClosingCapture {
+  readonly courseId: string;
+  readonly period: string;
+  readonly entries: ReadonlyArray<{
+    readonly studentId: string;
+    readonly value: number;
+    readonly motive?: string;
+  }>;
+  /** Token opaco de versión vigente (ADR 0016); sin él, no versiona. */
+  readonly baseVersion?: string;
+  readonly idempotencyKey?: string;
+}
+
 /**
  * Fachada de captura offline: traduce las operaciones de escritura (clase,
  * evaluación, notas) a items de la cola, poblando `Idempotency-Key` y el token
@@ -307,6 +321,17 @@ export class ClassSessionSync {
         ...(input.id === undefined ? {} : { id: input.id }),
       },
       idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+    });
+  }
+
+  /** Captura el cierre de período (`PUT /courses/:courseId/period-closings/:period`; F-12). */
+  async capturePeriodClosing(input: PeriodClosingCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'PUT',
+      path: `/courses/${input.courseId}/period-closings/${input.period}`,
+      body: { entries: input.entries },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
+      baseVersion: input.baseVersion ?? null,
     });
   }
 

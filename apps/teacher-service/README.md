@@ -4,10 +4,11 @@ Vertical del monorepo `app-factory`, generada por `tools/create-vertical` (fase 
 de [`docs/kernel-context.md`](../../docs/kernel-context.md) §7). Nace **cableada
 al kernel** y luego gana dominio con tests primero (D22, T25).
 
-Estado: **fase 5, F-01 + F-02 + F-03 + F-04** — captura de clase completa
-(asistencia + tema del día + tarea), **calificaciones numéricas** y **valoración
-preliminar TEA/TEP/TED**, todas **offline**, y la **planilla oficial PBA en PDF**
-(vista derivada, plantilla como dato, render en servidor) sobre el kernel:
+Estado: **fase 5, F-01 + F-02 + F-03 + F-04 + F-05** — captura de clase completa
+(asistencia + tema del día + tarea), **calificaciones numéricas**, **valoración
+preliminar TEA/TEP/TED**, la **planilla oficial PBA en PDF** (vista derivada,
+plantilla como dato, render en servidor) y el **registro/trayectoria del alumno**
+(observaciones, movimientos y evolución), todas **offline**, sobre el kernel:
 agregados con invariantes, persistencia y alcance, rutas y captura offline con
 convergencia.
 
@@ -23,7 +24,9 @@ convergencia.
   y token de versión (ADR 0010/0011/0012/0013). Los **puertos por agregado** siguen
   D6. F-04 suma la **vista derivada** de la planilla (`official-sheet.ts`): pura,
   sin persistencia, con el promedio ponderado y el roster por **legajo** (T6/§7.4,
-  ADR 0014).
+  ADR 0014). F-05 suma `StudentRecord` (`student-record.ts`): el
+  **registro/trayectoria del alumno**, un log **append-only** por legajo con
+  entradas `observacion` · `movimiento` · `evaluacion` (ADR 0015).
 - **Persistencia** (`src/persistence/`): entidades de fila + **mappers explícitos**
   (D7) y repositorios Pg (predicado de tenant + outbox en la misma transacción,
   D9/D10). F-04 suma el **read model** de la planilla
@@ -31,7 +34,7 @@ convergencia.
   predicado de tenant (no es un agregado; ADR 0014). Migraciones propias en
   `migrations/` (`0001-class-session.sql`,
   `0002-class-capture.sql`, `0003-evaluation-grades.sql`,
-  `0004-trajectory-assessment.sql`).
+  `0004-trajectory-assessment.sql`, `0005-student-record.sql`).
 - **Rutas** (`src/http/`): `POST/GET/PATCH /class-sessions`, `POST
   /courses/:courseId/topics`, `PUT /class-sessions/:id/topic`, `PUT
   /class-sessions/:id/attendance`, `POST /class-sessions/:id/assignments`,
@@ -39,14 +42,16 @@ convergencia.
   `PUT/GET /courses/:courseId/trajectory-assessments/:period`, bajo la política
   `lww` (sync §8.3, T10) con el header `X-Sync-Base-Version`. F-04 suma
   `GET /courses/:courseId/official-sheet.pdf`: la planilla derivada renderizada a
-  **PDF** en el servidor (lectura binaria **fuera** del envelope; ADR 0014).
+  **PDF** en el servidor (lectura binaria **fuera** del envelope; ADR 0014). F-05
+  suma `POST/GET /students/:studentId/records`: agrega y lista las entradas del
+  registro del alumno (ADR 0015).
 - **Captura offline** (`src/sync/`): el composition root del cliente
   (`createClassSessionSync`) cablea `@kernel/client` con la **política offline**
-  de la vertical (encolables las rutas de captura de clase, de calificaciones y de
-  valoración) y su endpoint de probe; `ClassSessionSync` traduce crear/transicionar/
-  tema/asistencia/tarea/evaluación/notas/valoración a items de la cola, poblando
-  `Idempotency-Key` y el token `baseVersion`. El cliente es **parametrizado por
-  puertos** y sin navegador (D4, ADR 0008).
+  de la vertical (encolables las rutas de captura de clase, de calificaciones, de
+  valoración y del registro) y su endpoint de probe; `ClassSessionSync` traduce
+  crear/transicionar/tema/asistencia/tarea/evaluación/notas/valoración/registro a
+  items de la cola, poblando `Idempotency-Key` y el token `baseVersion`. El cliente
+  es **parametrizado por puertos** y sin navegador (D4, ADR 0008).
 - **Alcance** (`src/identity.ts`): un `SessionResolver` **placeholder**. La
   autenticación real (login de Google, T22) y el token público (T9) son contratos
   aparte; reemplazá el stub antes de producción.
@@ -69,7 +74,11 @@ convergencia.
   plantilla fail-closed (`test/documents/template.test.ts`), el PDF determinista
   (`test/documents/pdf-renderer.test.ts`) y el borde de la planilla
   (`test/http/official-sheet-api.test.ts`: binario, curso vacío, cross-tenant,
-  `SCOPE_MISSING`, cabecera opaca, override de plantilla y fail-closed).
+  `SCOPE_MISSING`, cabecera opaca, override de plantilla y fail-closed). F-05
+  agrega el registro del alumno (`test/domain/student-record.test.ts`, mappers) y
+  su borde (`test/http/student-record-api.test.ts`, `test/sync/student-records.test.ts`:
+  los tres tipos, límites 1–10, fecha, orden de la trayectoria, cross-tenant,
+  `SCOPE_MISSING`, replay y convergencia offline).
 
 ## Qué NO trae (a propósito)
 
@@ -93,6 +102,12 @@ convergencia.
   versionado (`kernel-config`) y el render es en **servidor** (el render
   local/offline se difiere, §8 ⚠️). **Excel/CSV**, el **enlace público** (T8/T9) y
   la promoción a `kernel-documents`/`kernel-storage` (D18) quedan fuera (ADR 0014).
+- **Registro sí; planilla imprimible y cierre todavía no**: F-05 captura el
+  **registro/trayectoria** (ADR 0015). La **planilla de uso diario imprimible**, el
+  **cierre de período** (promedio automático + override manual) y la **búsqueda
+  fuzzy** por nombre quedan para slices siguientes (la búsqueda necesita `Alumno`,
+  F-06). La **dimensión/radar** (fortalezas/debilidades) y la **intensificación**
+  (F-10/F-11) también quedan fuera.
 
 ## Comandos
 

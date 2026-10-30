@@ -47,3 +47,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 | [0012](0012-calificaciones-f-02.md) | Calificaciones numéricas offline (F-02): modelo de `Evaluación` y `Nota` | propuesto |
 | [0013](0013-valoracion-preliminar-f-03.md) | Valoración preliminar TEA/TEP/TED offline (F-03): modelo de `TrajectoryAssessment` | propuesto |
 | [0014](0014-planilla-oficial-f-04.md) | Planilla oficial PBA en PDF (F-04): vista derivada, plantilla como dato y render en servidor | propuesto |
+| [0015](0015-trayectoria-del-alumno.md) | Trayectoria del alumno (registro): observaciones, evolución y movimientos | propuesto |

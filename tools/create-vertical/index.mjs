@@ -27,6 +27,7 @@ export const EXPECTED_FILES = [
   'package.json',
   'tsconfig.json',
   'tsconfig.build.json',
+  'vitest.config.ts',
   'README.md',
   'src/index.ts',
   'src/app.ts',

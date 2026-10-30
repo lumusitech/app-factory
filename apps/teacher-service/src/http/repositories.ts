@@ -1,3 +1,5 @@
+import type { ConfigEntryRepository } from '@kernel/config';
+
 import type { AssignmentRepository } from '../domain/assignment-repository.js';
 import type { ClassAttendanceRepository } from '../domain/class-attendance-repository.js';
 import type { ClassSessionRepository } from '../domain/class-session-repository.js';
@@ -6,11 +8,16 @@ import type { EvaluationRepository } from '../domain/evaluation-repository.js';
 import type { GradeSheetRepository } from '../domain/grade-sheet-repository.js';
 import type { TopicRepository } from '../domain/topic-repository.js';
 import type { TrajectoryAssessmentRepository } from '../domain/trajectory-assessment-repository.js';
+import type { OfficialSheetReadModel } from '../persistence/official-sheet-read-model.js';
 
 /**
  * Bag de repositorios por agregado (D6) que el borde consume dentro de la unidad
  * de trabajo (F-01/F-02/F-03; ADR 0011/0012/0013). Un puerto por agregado, nunca
  * `Repository<T>`.
+ *
+ * F-04 (ADR 0014) suma dos entradas que **no** son agregados de la planilla
+ * (vista derivada, T6): el **read model** de la planilla (lectura cross-agregado)
+ * y el repositorio de **configuración** del tenant (D19/ADR 0007; la plantilla).
  */
 export interface TeacherRepositories {
   readonly classes: ClassSessionRepository;
@@ -21,4 +28,6 @@ export interface TeacherRepositories {
   readonly evaluations: EvaluationRepository;
   readonly gradeSheets: GradeSheetRepository;
   readonly trajectoryAssessments: TrajectoryAssessmentRepository;
+  readonly officialSheet: OfficialSheetReadModel;
+  readonly config: ConfigEntryRepository;
 }

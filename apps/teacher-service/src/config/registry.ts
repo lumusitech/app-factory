@@ -1,26 +1,52 @@
-import type { ConfigSchemaRegistry } from '@kernel/config';
+import type { ConfigSchemaRegistry, ConfigValue } from '@kernel/config';
+
+import {
+  OFFICIAL_SHEET_TEMPLATE_KEY,
+  parseOfficialSheetTemplate,
+} from '../documents/template.js';
 
 /**
  * Catálogo de claves y esquemas de la vertical (ADR 0007, D19).
  *
- * El kernel **no** define el catálogo: la vertical registra sus claves
- * (`calendar.term`, `grading.thresholds`, …) y sabe validar cada valor. Este
- * stub arranca **vacío** y por lo tanto **fail-closed**: ninguna clave se puede
- * escribir hasta registrarla acá.
+ * El kernel **no** define el catálogo: la vertical registra sus claves y sabe
+ * validar cada valor. Está **fail-closed**: una clave no registrada no se puede
+ * escribir.
+ *
+ * F-04 registra la clave de la **plantilla de la planilla** (T7, ADR 0014): es un
+ * **dato versionado** por `(jurisdicción, nivel, año)`, validado por
+ * `parseOfficialSheetTemplate`, el mismo esquema que valida la plantilla en la
+ * **lectura**. Cambiar provincia/año no requiere release.
  */
+
+const OFFICIAL_SHEET_TEMPLATE_VERSION = 1;
+
+interface CatalogEntry {
+  readonly version: number;
+  readonly isValid: (value: ConfigValue) => boolean;
+}
+
+function isValidOfficialSheetTemplate(value: ConfigValue): boolean {
+  try {
+    parseOfficialSheetTemplate(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const catalog = new Map<string, CatalogEntry>([
+  [
+    OFFICIAL_SHEET_TEMPLATE_KEY,
+    { version: OFFICIAL_SHEET_TEMPLATE_VERSION, isValid: isValidOfficialSheetTemplate },
+  ],
+]);
+
 export function createConfigRegistry(): ConfigSchemaRegistry {
-  // Extension point: registrá cada clave con su versión vigente y su validador.
-  // Ejemplo:
-  //   const catalog = new Map<string, { version: number; isValid: (value: ConfigValue) => boolean }>([
-  //     ['grading.thresholds', { version: 1, isValid: (value) => typeof value === 'object' }],
-  //   ]);
-  //   return {
-  //     currentVersion: (key) => catalog.get(key)?.version ?? null,
-  //     isValid: (key, schemaVersion, value) =>
-  //       catalog.get(key)?.version === schemaVersion && (catalog.get(key)?.isValid(value) ?? false),
-  //   };
   return {
-    currentVersion: () => null,
-    isValid: () => false,
+    currentVersion: (key) => catalog.get(key)?.version ?? null,
+    isValid: (key, schemaVersion, value) => {
+      const entry = catalog.get(key);
+      return entry !== undefined && entry.version === schemaVersion && entry.isValid(value);
+    },
   };
 }

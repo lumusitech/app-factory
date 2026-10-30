@@ -50,3 +50,4 @@ Copiar [`0000-template.md`](0000-template.md) al siguiente número libre.
 | [0015](0015-trayectoria-del-alumno.md) | Trayectoria del alumno (registro): observaciones, evolución y movimientos | propuesto |
 | [0016](0016-cierre-de-periodo-f-12.md) | Cierre de período (F-12 parcial): nota automática, override manual y vista derivada | propuesto |
 | [0017](0017-planilla-de-uso-diario.md) | Planilla de uso diario imprimible: vista derivada, plantilla como dato y render en servidor | propuesto |
+| [0018](0018-verificacion-humana-runtime-seed-docker.md) | Verificación humana del backend: runtime de desarrollo, seed idempotente y Docker | propuesto |

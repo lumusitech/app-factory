@@ -420,6 +420,12 @@ planilla.
   Identificadas por `(jurisdicción, nivel, año)`. Sin release para actualizar.
   La primera plantilla es **PBA secundaria**.
 - **Salida**: PDF listo para imprimir y firmar al pie. También Excel/CSV.
+- **Planilla de uso diario**: la hoja de trabajo del docente —**vista derivada**
+  de asistencia por fecha + actividades/notas del período + valoración TEA/TEP/TED
+  + cierre de período + evolución del registro—, en PDF, en dos disposiciones
+  (planilla entera del curso y seguimiento de un alumno). Es la contraparte "de
+  trabajo" de la plantilla oficial; su layout también es **dato versionado**
+  (ADR 0017).
 - **Informe de valoración preliminar**: TEA/TEP/TED a mitad de cuatrimestre
   (mayo y octubre), con la asistencia y la continuidad de la trayectoria.
 - **Libro de temas**: PDF con trazabilidad de reprogramaciones.

@@ -153,14 +153,14 @@ incorrecto.
 
 ### T17 — Valoración cualitativa a mitad de cuatrimestre
 TEA / TEP / TED — *Trayectoria Educativa Avanzada / en Proceso / Discontinua*
-(Res. 1236/23 DGCyE). Se registra a mediados de cada cuatrimestre (mayo y
+(Res. 1650/24 DGCyE). Se registra a mediados de cada cuatrimestre (mayo y
 octubre) y se comunica a las familias. Al **cierre** del cuatrimestre va nota
 numérica, más el registro en el RITE (Registro Institucional de Trayectorias
 Educativas).
 
 ### T18 — Dos cuatrimestres, con ventanas de intensificación configurables
-El ciclo tiene 2 cuatrimestres. Las ventanas de intensificación (marzo,
-julio/agosto, noviembre/diciembre) **las define cada escuela** según normativa:
+El ciclo tiene 2 cuatrimestres. Las ventanas de intensificación (al inicio y al
+cierre de cada cuatrimestre) **las define cada escuela** según normativa:
 una puede intensificar todo noviembre y otra solo las últimas dos semanas.
 
 El **calendario institucional es un dato configurable**, no una constante, y es
@@ -280,7 +280,7 @@ constante. Contiene:
 |---|---|---|
 | Cuatrimestres | C1 y C2 | fijo: 2 por ciclo |
 | Valoración preliminar | mitad de C1 (mayo), mitad de C2 (octubre) | sí, fechas |
-| Ventanas de intensificación | marzo · julio/agosto · noviembre/diciembre | **sí, por escuela** |
+| Ventanas de intensificación | inicio y cierre de cada cuatrimestre | **sí, por escuela** |
 | Cierre de cuatrimestre | fin de C1, fin de C2 | sí, fechas |
 | Feriados y jornadas institucionales | calendario DGCyE + actos de la escuela | sí |
 
@@ -494,7 +494,7 @@ negocio. Queda **una sola abierta**:
 
 | Tema | Cuándo se decide |
 |---|---|
-| Render de PDF en cliente vs servidor | al construir F-04 |
+| Render de PDF en cliente vs servidor | **resuelto en F-04**: servidor, determinista (ADR 0014); el render local/offline queda diferido |
 | Algoritmo de similitud para duplicados | al construir F-06 / F-23 |
 | Voz para observaciones | si F-29 entra en alcance |
 
@@ -528,10 +528,15 @@ negocio. Queda **una sola abierta**:
 
 ## 13. Anexo normativo — Provincia de Buenos Aires
 
-Fuente: **Resolución 1236/23** (DGCyE) y Anexos de *Evaluación y Acreditación*
+Fuente: **Resolución 1650/24** (DGCyE, *Régimen Académico* de la Educación
+Secundaria), con la **Disposición 40/26** (complementaria / aclaratoria). Base
+previa: Resolución 1236/23 y sus Anexos de *Evaluación y Acreditación*
 (IF-2024-19739952-GDEBA-DPESECDGCYE, IF-2024-20106082-GDEBA-DPESECDGCYE).
-Verificado en octubre de 2026; el Consejo General revalidó la organización en
-dos cuatrimestres y las instancias de intensificación.
+Verificado en octubre de 2026 (§13.4): se mantienen la organización en dos
+cuatrimestres, la valoración preliminar TEA/TEP/TED, los umbrales (≥7 / 4–10) y la
+asistencia del 75% por materia; difiere el número de momentos de intensificación
+(ver §13.2). Los formularios oficiales citados por DGCyE son el *Registro Anual de
+Calificaciones* y el *RITE*.
 
 ### 13.1 Valoraciones
 
@@ -555,8 +560,9 @@ cierre.
   **4 a 10**.
 - La intensificación es **por cuatrimestre**: se intensifican solo los contenidos
   pendientes del período no aprobado.
-- Existen **tres momentos** en el año: marzo (inicio), julio/agosto (mitad),
-  noviembre/diciembre (antes de exámenes).
+- Existen **seis momentos** en el año: al **inicio y al cierre de cada**
+  cuatrimestre (RA vigente, Res. 1650/24).
+- La **asistencia** se acredita con el **75%** de las clases de la materia.
 - **Cada escuela define la forma y la duración** de cada ventana según normativa
   → por eso el calendario es configurable (T18).
 
@@ -568,6 +574,9 @@ artefacto para que el docente lo transcriba o lo imprima.
 
 ### 13.4 Advertencia de vigencia
 
-La normativa educativa cambia por resolución. Antes de construir F-04, verificar
-que el régimen siga vigente para el ciclo lectivo en curso. Este anexo es una
-foto, no una verdad permanente.
+La normativa educativa cambia por resolución. **Verificación hecha al construir
+F-04** (octubre 2026): el régimen vigente es la **Res. 1650/24** (*Régimen
+Académico*) con la **Disp. 40/26**; la foto de Res. 1236/23 quedó **superada**
+(ver §13). Este anexo sigue siendo una foto, no una verdad permanente: antes de
+reconstruir la **plantilla** oficial, confirmar la forma del formulario del ciclo
+en curso (la plantilla es dato versionado, corregible sin release — T7, ADR 0014).

@@ -256,6 +256,15 @@ Alumno (legajo interno; DNI opcional)
 preliminar es un **acto por `(curso, período)`** (hoja batch, §1.3), aunque la
 `Valoración` se conciba por `Matrícula` una vez que F-06 la modele.
 
+**Reconciliación del registro (ADR 0015).** El `Registro` de este árbol (bajo
+`Matrícula`) se materializa en F-05 como un **log append-only por alumno**
+(`StudentRecord`), keyeado por el **legajo** mientras `Matrícula` no exista (F-06):
+entradas con fecha y tipo `observacion` (seguimiento global: rendimiento,
+dificultades, acompañamiento, salud, conducta, comunicados), `movimiento`
+(traslado/baja, con motivo) y `evaluacion` (evolución de un trabajo; **la última
+nota manda**). Observaciones y movimientos son **globales** (cruzan cursos y años),
+no por curso: es la base de la trayectoria.
+
 ### 3.2 Reglas de negocio
 
 | Regla | Definición | Configurable |
@@ -568,9 +577,10 @@ cierre.
 
 ### 13.3 RITE
 
-**Registro Institucional de Trayectorias Educativas**: donde la escuela asienta
-la calificación numérica. La app **no integra** con el RITE (T8): genera el
-artefacto para que el docente lo transcriba o lo imprima.
+**Registro Institucional de Trayectorias Educativas**: **lo completa dirección**,
+no el docente. La app **no integra** con el RITE (T8): el artefacto del docente es
+la **planilla impresa** que llena con las calificaciones y el cierre de cada
+período (informe o cuatrimestre/año), para transcribir o imprimir.
 
 ### 13.4 Advertencia de vigencia
 

@@ -4,10 +4,12 @@ Vertical del monorepo `app-factory`, generada por `tools/create-vertical` (fase 
 de [`docs/kernel-context.md`](../../docs/kernel-context.md) §7). Nace **cableada
 al kernel** y luego gana dominio con tests primero (D22, T25).
 
-Estado: **fase 5, F-01 + F-02 + F-03** — captura de clase completa (asistencia +
-tema del día + tarea), **calificaciones numéricas** y **valoración preliminar
-TEA/TEP/TED**, todas **offline**, sobre el kernel: agregados con invariantes,
-persistencia y alcance, rutas y captura offline con convergencia.
+Estado: **fase 5, F-01 + F-02 + F-03 + F-04** — captura de clase completa
+(asistencia + tema del día + tarea), **calificaciones numéricas** y **valoración
+preliminar TEA/TEP/TED**, todas **offline**, y la **planilla oficial PBA en PDF**
+(vista derivada, plantilla como dato, render en servidor) sobre el kernel:
+agregados con invariantes, persistencia y alcance, rutas y captura offline con
+convergencia.
 
 ## Qué trae cableado
 
@@ -19,10 +21,15 @@ persistencia y alcance, rutas y captura offline con convergencia.
   `GradeSheet` (notas por evaluación) y `TrajectoryAssessment` (valoración
   preliminar TEA/TEP/TED por curso y período)— con invariantes, eventos por outbox
   y token de versión (ADR 0010/0011/0012/0013). Los **puertos por agregado** siguen
-  D6.
+  D6. F-04 suma la **vista derivada** de la planilla (`official-sheet.ts`): pura,
+  sin persistencia, con el promedio ponderado y el roster por **legajo** (T6/§7.4,
+  ADR 0014).
 - **Persistencia** (`src/persistence/`): entidades de fila + **mappers explícitos**
   (D7) y repositorios Pg (predicado de tenant + outbox en la misma transacción,
-  D9/D10). Migraciones propias en `migrations/` (`0001-class-session.sql`,
+  D9/D10). F-04 suma el **read model** de la planilla
+  (`official-sheet-read-model.ts`): lectura cross-agregado por `course_id` con el
+  predicado de tenant (no es un agregado; ADR 0014). Migraciones propias en
+  `migrations/` (`0001-class-session.sql`,
   `0002-class-capture.sql`, `0003-evaluation-grades.sql`,
   `0004-trajectory-assessment.sql`).
 - **Rutas** (`src/http/`): `POST/GET/PATCH /class-sessions`, `POST
@@ -30,7 +37,9 @@ persistencia y alcance, rutas y captura offline con convergencia.
   /class-sessions/:id/attendance`, `POST /class-sessions/:id/assignments`,
   `POST/GET /courses/:courseId/evaluations`, `PUT/GET /evaluations/:id/grades` y
   `PUT/GET /courses/:courseId/trajectory-assessments/:period`, bajo la política
-  `lww` (sync §8.3, T10) con el header `X-Sync-Base-Version`.
+  `lww` (sync §8.3, T10) con el header `X-Sync-Base-Version`. F-04 suma
+  `GET /courses/:courseId/official-sheet.pdf`: la planilla derivada renderizada a
+  **PDF** en el servidor (lectura binaria **fuera** del envelope; ADR 0014).
 - **Captura offline** (`src/sync/`): el composition root del cliente
   (`createClassSessionSync`) cablea `@kernel/client` con la **política offline**
   de la vertical (encolables las rutas de captura de clase, de calificaciones y de
@@ -42,8 +51,10 @@ persistencia y alcance, rutas y captura offline con convergencia.
   autenticación real (login de Google, T22) y el token público (T9) son contratos
   aparte; reemplazá el stub antes de producción.
 - **Configuración por tenant** (`src/config/registry.ts`): el
-  `ConfigSchemaRegistry` de la vertical, que arranca **vacío** y por lo tanto
-  **fail-closed**. Registrá tus claves y esquemas ahí (`@kernel/config`, D19).
+  `ConfigSchemaRegistry` de la vertical (`@kernel/config`, D19). F-04 registra la
+  clave de la **plantilla de la planilla** (`document.template.pba-secondary-2026`,
+  dato versionado por jurisdicción/nivel/año; T7, ADR 0014). Cualquier otra clave
+  sigue **fail-closed** hasta registrarla.
 - **Persistencia y migraciones** (`src/migrations.ts`): aplica las migraciones del
   kernel y las **propias** (`migrations/`). Sos el **único dueño** de tu esquema
   ([`docs/contracts/evolution.md`](../../docs/contracts/evolution.md) §3).
@@ -54,6 +65,11 @@ persistencia y alcance, rutas y captura offline con convergencia.
   watchdog, `5xx`, `401`/`4xx`, FIFO, head-of-line, conflicto `lww`, replay
   idempotente, los bordes de rango de la escala 1–10 y los bordes del enum
   TEA/TEP/TED) — bordes y rutas críticas, no solo el camino feliz (D22, T25).
+  F-04 agrega la vista derivada (`test/domain/official-sheet.test.ts`), la
+  plantilla fail-closed (`test/documents/template.test.ts`), el PDF determinista
+  (`test/documents/pdf-renderer.test.ts`) y el borde de la planilla
+  (`test/http/official-sheet-api.test.ts`: binario, curso vacío, cross-tenant,
+  `SCOPE_MISSING`, cabecera opaca, override de plantilla y fail-closed).
 
 ## Qué NO trae (a propósito)
 
@@ -71,7 +87,12 @@ persistencia y alcance, rutas y captura offline con convergencia.
   numérica final** no es una `Valoración`: es la `Nota` de `Evaluación` (F-02,
   ADR 0013). Los **umbrales por instancia** (§7.9/T16) y las **ventanas de
   mayo/octubre** (§7.8/T18) **no** se hardcodean: se difieren a `kernel-config`
-  cuando una feature los consuma (F-04/F-10/F-12/F-15).
+  cuando una feature los consuma (F-10/F-12/F-15).
+- **Sin persistir la planilla**: F-04 es una **vista derivada** —no una tabla
+  editable (§7.1/T6)—: no agrega tablas ni migración. La **plantilla** es dato
+  versionado (`kernel-config`) y el render es en **servidor** (el render
+  local/offline se difiere, §8 ⚠️). **Excel/CSV**, el **enlace público** (T8/T9) y
+  la promoción a `kernel-documents`/`kernel-storage` (D18) quedan fuera (ADR 0014).
 
 ## Comandos
 

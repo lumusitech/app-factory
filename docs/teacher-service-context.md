@@ -239,8 +239,9 @@ Docente (tenant)
          │   ├─ Asistencia   (alumno, estado)
          │   └─ Tarea         (contenido; tema opcional)
          ├─ Tema       (orden en el plan, contenido)
-         └─ Evaluación (nombre, período, peso)
-             └─ Nota   (alumno, valor)
+         ├─ Evaluación (nombre, período, peso)
+         │   └─ Nota   (alumno, valor)
+         └─ Cierre     (período; nota manual del docente por alumno, motivo opcional)
 
 Alumno (legajo interno; DNI opcional)
  └─ Matrícula (año, curso, materia, estado)
@@ -264,6 +265,14 @@ dificultades, acompañamiento, salud, conducta, comunicados), `movimiento`
 (traslado/baja, con motivo) y `evaluacion` (evolución de un trabajo; **la última
 nota manda**). Observaciones y movimientos son **globales** (cruzan cursos y años),
 no por curso: es la base de la trayectoria.
+
+**Cierre de período (ADR 0016).** El `Cierre` de §3.1 es la **nota manual** que el
+docente decide por alumno y período (el *override*); la **nota automática** se
+**deriva** del promedio simple de las notas vigentes (F-02) de las evaluaciones
+del período, ignorando las actividades sin nota. La **nota efectiva + su estado**
+(`automática`/`manual`) son **vista derivada** (T6), no una tabla. La **condición**
+(aprobado ≥7 / intensificación ≥4) **no** se calcula acá: depende de la instancia y
+el calendario (F-15) y es configurable (§7.8/§7.9/T16).
 
 ### 3.2 Reglas de negocio
 
@@ -315,6 +324,10 @@ falta de agua, falta de luz, baños, jornada institucional, otro.
 - **Trayectoria**: `matrículas con estado adeudada, de cualquier año`.
 - **Planilla**: `notas + valoraciones + asistencias + matrículas` mapeadas a la
   plantilla oficial.
+- **Cierre de período**: la nota **automática** es el promedio simple de las notas
+  vigentes del período; el docente puede **pisarla** con una nota **manual**; la
+  **nota efectiva + su estado** (`automática`/`manual`) son vista derivada
+  (ADR 0016).
 - **Riesgo**: `asistencia < umbral` ∪ `valoración TED` ∪ `trabajos sin entregar`.
 
 ---

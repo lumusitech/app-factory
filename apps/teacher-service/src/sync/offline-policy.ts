@@ -16,7 +16,8 @@ import type { QueuedRequestMethod } from '@kernel/contracts';
  * - `PUT /evaluations/:id/grades` (cargar notas de la evaluación; F-02);
  * - `PUT /courses/:courseId/trajectory-assessments/:period` (valoración
  *   preliminar TEA/TEP/TED; F-03);
- * - `POST /students/:studentId/records` (registro/trayectoria del alumno; F-05).
+ * - `POST /students/:studentId/records` (registro/trayectoria del alumno; F-05);
+ * - `PUT /courses/:courseId/period-closings/:period` (cierre de período; F-12).
  *
  * El resto —lecturas y el probe— nunca se encola.
  */
@@ -31,6 +32,7 @@ const COURSE_EVALUATIONS = /^\/courses\/[^/]+\/evaluations$/;
 const EVALUATION_GRADES = /^\/evaluations\/[^/]+\/grades$/;
 const COURSE_TRAJECTORY_ASSESSMENTS = /^\/courses\/[^/]+\/trajectory-assessments\/[^/]+$/;
 const STUDENT_RECORDS = /^\/students\/[^/]+\/records$/;
+const COURSE_PERIOD_CLOSINGS = /^\/courses\/[^/]+\/period-closings\/[^/]+$/;
 
 export const classSessionOfflinePolicy: OfflinePolicy = {
   isQueueable(method: QueuedRequestMethod, path: string): boolean {
@@ -51,7 +53,8 @@ export const classSessionOfflinePolicy: OfflinePolicy = {
         CLASS_SESSION_TOPIC.test(path) ||
         CLASS_SESSION_ATTENDANCE.test(path) ||
         EVALUATION_GRADES.test(path) ||
-        COURSE_TRAJECTORY_ASSESSMENTS.test(path)
+        COURSE_TRAJECTORY_ASSESSMENTS.test(path) ||
+        COURSE_PERIOD_CLOSINGS.test(path)
       );
     }
     return false;

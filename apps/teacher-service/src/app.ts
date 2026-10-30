@@ -18,6 +18,7 @@ import { registerClassTopicRoutes } from './http/class-topic-routes.js';
 import { registerEvaluationRoutes } from './http/evaluation-routes.js';
 import { registerGradeSheetRoutes } from './http/grade-sheet-routes.js';
 import { registerOfficialSheetRoutes } from './http/official-sheet-routes.js';
+import { registerPeriodClosingRoutes } from './http/period-closing-routes.js';
 import type { TeacherRepositories } from './http/repositories.js';
 import { registerStudentRecordRoutes } from './http/student-record-routes.js';
 import { registerTopicRoutes } from './http/topic-routes.js';
@@ -30,6 +31,8 @@ import { PgClassTopicRepository } from './persistence/class-topic-repository.js'
 import { PgEvaluationRepository } from './persistence/evaluation-repository.js';
 import { PgGradeSheetRepository } from './persistence/grade-sheet-repository.js';
 import { PgOfficialSheetReadModel } from './persistence/official-sheet-read-model.js';
+import { PgPeriodClosingReadModel } from './persistence/period-closing-read-model.js';
+import { PgPeriodClosingRepository } from './persistence/period-closing-repository.js';
 import { PgStudentRecordRepository } from './persistence/student-record-repository.js';
 import { PgTopicRepository } from './persistence/topic-repository.js';
 import { PgTrajectoryAssessmentRepository } from './persistence/trajectory-assessment-repository.js';
@@ -75,6 +78,8 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
     officialSheet: new PgOfficialSheetReadModel(context),
     config: new PgConfigEntryRepository(context, new PgOutboxPort(context)),
     studentRecords: new PgStudentRecordRepository(context, new PgOutboxPort(context)),
+    periodClosings: new PgPeriodClosingRepository(context, new PgOutboxPort(context)),
+    periodClosingView: new PgPeriodClosingReadModel(context),
   }));
 
   registerProbeRoute(app, deps.clock);
@@ -93,6 +98,7 @@ export async function buildApp(deps: AppDependencies): Promise<FastifyInstance> 
     configRegistry: createConfigRegistry(),
   });
   registerStudentRecordRoutes(app, { uow, clock: deps.clock, idGenerator });
+  registerPeriodClosingRoutes(app, { uow, clock: deps.clock, idGenerator });
 
   return app;
 }

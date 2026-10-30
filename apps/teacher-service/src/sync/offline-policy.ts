@@ -15,7 +15,8 @@ import type { QueuedRequestMethod } from '@kernel/contracts';
  * - `POST /courses/:courseId/evaluations` (crear evaluación; F-02);
  * - `PUT /evaluations/:id/grades` (cargar notas de la evaluación; F-02);
  * - `PUT /courses/:courseId/trajectory-assessments/:period` (valoración
- *   preliminar TEA/TEP/TED; F-03).
+ *   preliminar TEA/TEP/TED; F-03);
+ * - `POST /students/:studentId/records` (registro/trayectoria del alumno; F-05).
  *
  * El resto —lecturas y el probe— nunca se encola.
  */
@@ -29,6 +30,7 @@ const CLASS_SESSION_ASSIGNMENTS = /^\/class-sessions\/[^/]+\/assignments$/;
 const COURSE_EVALUATIONS = /^\/courses\/[^/]+\/evaluations$/;
 const EVALUATION_GRADES = /^\/evaluations\/[^/]+\/grades$/;
 const COURSE_TRAJECTORY_ASSESSMENTS = /^\/courses\/[^/]+\/trajectory-assessments\/[^/]+$/;
+const STUDENT_RECORDS = /^\/students\/[^/]+\/records$/;
 
 export const classSessionOfflinePolicy: OfflinePolicy = {
   isQueueable(method: QueuedRequestMethod, path: string): boolean {
@@ -37,7 +39,8 @@ export const classSessionOfflinePolicy: OfflinePolicy = {
         path === CLASS_SESSION_PATH ||
         COURSE_TOPICS.test(path) ||
         CLASS_SESSION_ASSIGNMENTS.test(path) ||
-        COURSE_EVALUATIONS.test(path)
+        COURSE_EVALUATIONS.test(path) ||
+        STUDENT_RECORDS.test(path)
       );
     }
     if (method === 'PATCH') {

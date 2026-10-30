@@ -146,6 +146,20 @@ export interface TrajectoryAssessmentCapture {
   readonly idempotencyKey?: string;
 }
 
+/** Captura de una entrada del registro del alumno (`POST /students/:studentId/records`; F-05). */
+export interface StudentRecordCapture {
+  readonly studentId: string;
+  readonly kind: 'observacion' | 'movimiento' | 'evaluacion';
+  readonly occurredOn: string;
+  readonly note?: string;
+  readonly category?: string;
+  readonly evaluationId?: string;
+  readonly grade?: number;
+  /** Id opcional (UUIDv7, D8) para capturar offline. */
+  readonly id?: string;
+  readonly idempotencyKey?: string;
+}
+
 /**
  * Fachada de captura offline: traduce las operaciones de escritura (clase,
  * evaluación, notas) a items de la cola, poblando `Idempotency-Key` y el token
@@ -275,6 +289,24 @@ export class ClassSessionSync {
       body: { entries: input.entries },
       idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
       baseVersion: input.baseVersion ?? null,
+    });
+  }
+
+  /** Captura una entrada del registro del alumno (`POST /students/:studentId/records`; F-05). */
+  async captureStudentRecord(input: StudentRecordCapture): Promise<QueuedRequest> {
+    return this.#client.enqueue({
+      method: 'POST',
+      path: `/students/${input.studentId}/records`,
+      body: {
+        kind: input.kind,
+        occurredOn: input.occurredOn,
+        ...(input.note === undefined ? {} : { note: input.note }),
+        ...(input.category === undefined ? {} : { category: input.category }),
+        ...(input.evaluationId === undefined ? {} : { evaluationId: input.evaluationId }),
+        ...(input.grade === undefined ? {} : { grade: input.grade }),
+        ...(input.id === undefined ? {} : { id: input.id }),
+      },
+      idempotencyKey: this.#idempotencyKey(input.idempotencyKey),
     });
   }
 

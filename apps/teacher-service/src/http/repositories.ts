@@ -9,6 +9,7 @@ import type { GradeSheetRepository } from '../domain/grade-sheet-repository.js';
 import type { TopicRepository } from '../domain/topic-repository.js';
 import type { TrajectoryAssessmentRepository } from '../domain/trajectory-assessment-repository.js';
 import type { OfficialSheetReadModel } from '../persistence/official-sheet-read-model.js';
+import type { StudentRecordRepository } from '../domain/student-record-repository.js';
 
 /**
  * Bag de repositorios por agregado (D6) que el borde consume dentro de la unidad
@@ -30,4 +31,5 @@ export interface TeacherRepositories {
   readonly trajectoryAssessments: TrajectoryAssessmentRepository;
   readonly officialSheet: OfficialSheetReadModel;
   readonly config: ConfigEntryRepository;
+  readonly studentRecords: StudentRecordRepository;
 }
